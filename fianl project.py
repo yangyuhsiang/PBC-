@@ -4,11 +4,41 @@ import dlib
 import random
 from math import hypot
 
-
 stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
+paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
+scissor = cv.imread('C:\\Users\\user\\Desktop\\scissor.png', cv.IMREAD_UNCHANGED)
+
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 predictor = dlib.shape_predictor("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\shape_predictor_68_face_landmarks.dat")
+
+
+def stone_change(stone, w1, h1):
+    resize_stone = cv.resize(stone, (w1, h1))
+    stone_mask_bgr = resize_stone[:, :, :3]
+    stone_alpha_ch = resize_stone[:, :, 3]
+    _, pic_mask = cv.threshold(stone_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(stone_mask_bgr, stone_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
+
+
+def paper_change(paper, w1, h1):
+    resize_paper = cv.resize(paper, (w1, h1))
+    paper_mask_bgr = resize_paper[:, :, :3]
+    paper_alpha_ch = resize_paper[:, :, 3]
+    _, pic_mask = cv.threshold(paper_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(paper_mask_bgr, paper_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
+
+
+def scissor_change(scissor, w1, h1):
+    resize_scissor = cv.resize(scissor, (w1, h1))
+    scissor_mask_bgr = resize_scissor[:, :, :3]
+    scissor_alpha_ch = resize_scissor[:, :, 3]
+    _, pic_mask = cv.threshold(scissor_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(scissor_mask_bgr, scissor_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
+
 
 while True:
     ret, image = capture.read()
@@ -20,33 +50,37 @@ while True:
         x2 = face.right()
         y2 = face.bottom()            
 
-        width = int(x2 - x1)
-        high = int(y2 - y1)
+        face_width = int(x2 - x1)
+        face_hight = int(y2 - y1)
             
-        w1 = width//2
-        h1 = high//2
+        pic_width1 = face_width//2  # 剪刀石頭布的圖要resize的寬跟高
+        pic_hight1 = face_hight//2
             
-        w2 = width//4
-        h2 = high//4
+        pic_width2 = face_width//4  # 剪刀石頭布的圖要放的位置
+        pic_hight2 = face_hight//4
 
-        resize_stone = cv.resize(stone, (w1, h1))
-        stone_mask_bgr = resize_stone[:, :, :3]
-        stone_alpha_ch = resize_stone[:, :, 3]
-        _, stone_mask = cv.threshold(stone_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        '''三個函數隨機變動，所以剪刀石頭布可以隨機換'''
+        type = random.randrange(0, 2)
+        if type == 0:
+            pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
+        elif type == 1:
+            pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
+        else:
+            pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
+
+        image_area_no_face = cv.bitwise_not(pic_mask)
+        pic_area = image[y1-pic_hight2 : y1+pic_hight1-pic_hight2,
+                           x1+pic_width2 : x1+pic_width1+pic_width2]
 
 
-            
-        stone_area_no_face = cv.bitwise_not(stone_mask)
-        stone_area = image[y1-h2:y1+h1-h2, x1+w2:x1+w1+w2]
+        face_part = cv.bitwise_and(pic_area, pic_area, mask=image_area_no_face)
 
-        stone_part = cv.bitwise_and(stone_mask_bgr, stone_mask_bgr, mask=stone_mask)
-        face_part = cv.bitwise_and(stone_area, stone_area, mask=stone_area_no_face)
-            
-        final_stone = cv.add(face_part, stone_part)
-        image[y1-h2:y1+h1-h2, x1+w2:x1+w1+w2] = final_stone
-            
-        image = cv.flip(image, 1)
-        cv.imshow('stone_mask', image)
+        final_part = cv.add(face_part, pic_part)
+        image[y1-pic_hight2 : y1+pic_hight1-pic_hight2,
+              x1+pic_width2 : x1+pic_width1+pic_width2] = final_part
+    
+    image = cv.flip(image, 1)
+    cv.imshow('final', image)
     key = cv.waitKey(50)
     if key == 27:
         break
