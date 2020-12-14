@@ -86,6 +86,13 @@ while True:
     # 最後要show出的image的處理，然後show出
     image = cv.flip(image, 1)
     cv.imshow('final', image)
-    key = cv.waitKey(50)
-    if key == 27:
+    if cv.waitKey(1) &  0xFF == ord('q'):
+        record_image = image  # 記錄停下的時候的圖
+        capture.release()  # 把相機停掉
+        cv.destroyAllWindows()  #　把相機的視窗關掉
         break
+
+# show出按下停止鍵當下的照片
+cv.imshow('record_image',record_image)
+key = cv.waitKey(0)
+cv.destroyAllWindows()
