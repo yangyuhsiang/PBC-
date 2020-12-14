@@ -10,7 +10,6 @@ scissor = cv.imread('C:\\Users\\user\\Desktop\\scissor.png', cv.IMREAD_UNCHANGED
 
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
-predictor = dlib.shape_predictor("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\shape_predictor_68_face_landmarks.dat")
 
 
 def stone_change(stone, w1, h1):
@@ -60,7 +59,7 @@ while True:
         pic_hight2 = face_hight//4
 
         '''三個函數隨機變動，所以剪刀石頭布可以隨機換'''
-        type = random.randrange(0, 2)
+        type = random.randrange(0, 3)
         if type == 0:
             pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
         elif type == 1:
