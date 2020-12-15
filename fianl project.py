@@ -44,6 +44,7 @@ def scissor_change(scissor, w1, h1):
 Round = 0  # 紀錄是第幾張臉的變數
 while True:
     ret, image = capture.read()
+    image = cv.flip(image, 1)
     gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
     faces = detector(gray_image, 0)
     for face in faces:
@@ -69,37 +70,39 @@ while True:
         if Round == 0:
             if type == 0:
                 pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
-                stone_first, paper_first, scissor_first = 1, 0, 0
+                first_choice = [1, 0, 0]
                 first_position = [(x1, y1), (x2, y2)]
 
             elif type == 1:
                 pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
-                stone_first, paper_first, scissor_first = 0, 1, 0
+                first_choice = [0, 1, 0]
                 first_position = [(x1, y1), (x2, y2)]
 
             elif type == 2:
                 pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
-                stone_first, paper_first, scissor_first = 0, 0, 1
+                first_choice = [0, 0, 1]
                 first_position = [(x1, y1), (x2, y2)]
-            Round = 1  # 第一張臉的出拳紀錄完成，下一輪要記錄第二張臉的出拳
+            Round = 1
+            # 第一張臉的出拳紀錄完成，下一輪要記錄第二張臉的出拳
 
         # 第二張臉的紀錄
         else:
             if type == 0:
                 pic_mask, pic_part = paper_change(stone, pic_width1, pic_hight1)
-                stone_second, paper_second, scissor_second = 1, 0, 0
+                second_choice = [1, 0, 0]
                 second_position = [(x1, y1), (x2, y2)]
 
             elif type == 1:
                 pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
-                stone_second, paper_second, scissor_second = 0, 1, 0
-                second_position = [(x1, y1), (x2, y2)]
+                second_choice = [0, 1, 0]
+                second_position  = [(x1, y1), (x2, y2)]
 
             elif type == 2:
                 pic_mask, pic_part = paper_change(scissor, pic_width1, pic_hight1)
-                stone_second, paper_second, scissor_second = 0, 0, 1
+                second_choice = [0, 0, 1]
                 second_position = [(x1, y1), (x2, y2)]
-            Round = 0  # 第二張臉的紀錄完成，可以重新記錄了'
+            Round = 0
+            # 第二張臉的紀錄完成，可以重新記錄了
 
         # 額頭要放上剪刀石頭布的位置的處理
         image_area_no_face = cv.bitwise_not(pic_mask)
@@ -113,18 +116,35 @@ while True:
               x1+pic_width2 : x1+pic_width1+pic_width2] = final_part
 
     # 最後要show出的image的處理，然後show出
-    image = cv.flip(image, 1)
     cv.imshow('final', image)
     if cv.waitKey(1) &  0xFF == ord('q'):
         if len(faces) == 2:  # 如果有偵測到兩張臉才可以停下
-            record_image = image  # 記錄停下的時候的圖
-            print(stone_first, paper_first, scissor_first, first_position)  # just for test
-            print(stone_second, paper_second, scissor_second, second_position)  # just for test
-            capture.release()  # 把相機停掉
+            record_image = image
+            capture.release()
             cv.destroyAllWindows()
             break
 
 # show出按下停止鍵當下的照片
+first_person = first_choice.index(1)
+second_person = second_choice.index(1)
+
+# 判斷誰輸誰贏
+# 一開始先預設second person win
+who_win = 2
+win_position = second_position
+
+# 平手
+if((first_person == 0 and second_person == 0) or (first_person == 1 and second_person == 1)
+    or (first_person == 2 and second_person == 2)):
+    who_win = 0
+    win_position = [(0,0), (50,50)]
+
+# first_person 贏
+elif((first_person == 0 and second_person == 2) or (first_person == 1 and second_person == 0)
+    or(first_person == 2 and second_person == 1)):
+    who_win = 1
+    win_position = first_position
+
 cv.imshow('record_image',record_image)
 key = cv.waitKey(0)
 cv.destroyAllWindows()
