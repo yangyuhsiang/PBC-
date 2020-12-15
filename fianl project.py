@@ -124,11 +124,10 @@ while True:
             cv.destroyAllWindows()
             break
 
-# show出按下停止鍵當下的照片
+# 判斷誰輸誰贏
 first_person = first_choice.index(1)
 second_person = second_choice.index(1)
 
-# 判斷誰輸誰贏
 # 一開始先預設second person win
 who_win = 2
 win_position = second_position
@@ -145,6 +144,7 @@ elif((first_person == 0 and second_person == 2) or (first_person == 1 and second
     who_win = 1
     win_position = first_position
 
+# show出結果(這邊之後要處理照片)
 cv.imshow('record_image',record_image)
 key = cv.waitKey(0)
 cv.destroyAllWindows()
