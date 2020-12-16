@@ -4,9 +4,9 @@ import dlib
 import random
 from math import hypot
 
-stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
-paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
-scissor = cv.imread('C:\\Users\\user\\Desktop\\scissor.png', cv.IMREAD_UNCHANGED)
+stone = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png', cv.IMREAD_UNCHANGED)
+paper = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png', cv.IMREAD_UNCHANGED)
+scissor = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png', cv.IMREAD_UNCHANGED)
 
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
@@ -189,7 +189,7 @@ def loser(record_image, loser_face):
     loser_pic_hight2 = loser_hight // 4
     
     def resize_loser_pic(resize_width, resize_hight):
-        loser_pic = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\loser.png", cv.IMREAD_UNCHANGED)
+        loser_pic = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\loser.png", cv.IMREAD_UNCHANGED)
         resize_loser = cv.resize(loser_pic, (resize_width, resize_hight))
         loser_mask_bgr = resize_loser[:, :, :3]
         loser_alpha_ch = resize_loser[:, :, 3]
@@ -209,9 +209,111 @@ def loser(record_image, loser_face):
 
     return record_image
 
+#處理贏家的特效
+def winner(record_image, win_face):
+    predictor = dlib.shape_predictor('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\shape_predictor_68_face_landmarks.dat')
+    landmarks = predictor(record_image, win_face)
+    
+    
+    # cigarette
+    mouth_left = (landmarks.part(48).x, landmarks.part(48).y)
+    mouth_right = (landmarks.part(54).x, landmarks.part(54).y)
+        
+    mouth_width = int(hypot(mouth_left[0] - mouth_right[0], mouth_left[1] - mouth_right[1]))
+    mouth_height = int(mouth_width * 1.2)
+    
+    def resize_cigarette(mouth_width, mouth_height):
+        cigarette = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\cigarette.png', cv.IMREAD_UNCHANGED)
+        resize_cigarette = cv.resize(cigarette, (mouth_width, mouth_height))
+        cigarette_mask_bgr = resize_cigarette[:, :, :3]
+        cigarette_alpha_ch = resize_cigarette[:, :, 3]
+        _, mouth_mask = cv.threshold(cigarette_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        mouth_part = cv.bitwise_and(cigarette_mask_bgr, cigarette_mask_bgr, mask=mouth_mask)
+        return mouth_mask, mouth_part
+    mouth_mask, mouth_part = resize_cigarette(mouth_width, mouth_height)
+    mouth_area_no_mouth = cv.bitwise_not(mouth_mask)
+    
+    top_left = (int(mouth_left[0]), int(mouth_left[1] - mouth_height/2))
+    mouth_area = record_image[top_left[1]: top_left[1] + mouth_height,
+                              top_left[0]: top_left[0] + mouth_width]
+                              
+    winner_mouth_part = cv.bitwise_and(mouth_area, mouth_area, mask=mouth_area_no_mouth)
+    final_winner_mouth = cv.add(winner_mouth_part, mouth_part)
+    record_image[top_left[1]: top_left[1] + mouth_height,
+                 top_left[0]: top_left[0] + mouth_width] = final_winner_mouth
+    
+    
+    # glasses
+    eye_left = (landmarks.part(36).x, landmarks.part(36).y)
+    eye_right = (landmarks.part(45).x, landmarks.part(45).y)
+        
+    eye_width = int(hypot(eye_left[0] - eye_right[0], eye_left[1] - eye_right[1])) * 2
+    eye_height = int(eye_width * 0.22)
+    
+    def resize_glasses(eye_width, eye_height):
+        glasses = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\glasses.png', cv.IMREAD_UNCHANGED)
+        resize_glasses = cv.resize(glasses, (eye_width, eye_height))
+        glasses_mask_bgr = resize_glasses[:, :, :3]
+        glasses_alpha_ch = resize_glasses[:, :, 3]
+        _, eye_mask = cv.threshold(glasses_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        eye_part = cv.bitwise_and(glasses_mask_bgr, glasses_mask_bgr, mask=eye_mask)
+        return eye_mask, eye_part
+    eye_mask, eye_part = resize_glasses(eye_width, eye_height)
+    eye_area_no_eye = cv.bitwise_not(eye_mask)
+    
+    top_left = (int(eye_left[0]-eye_width/3), int(eye_left[1] - eye_height/2))
+    eye_area = record_image[top_left[1]: top_left[1] + eye_height,
+                              top_left[0]: top_left[0] + eye_width]
+    
+    winner_eye_part = cv.bitwise_and(eye_area, eye_area, mask=eye_area_no_eye)
+    final_winner_eye = cv.add(winner_eye_part, eye_part)
+    record_image[top_left[1]: top_left[1] + eye_height,
+                 top_left[0]: top_left[0] + eye_width] = final_winner_eye
+    
+    
+    winner_x1 = win_face.left()
+    winner_y1 = win_face.top()
+    winner_x2 = win_face.right()
+    winner_y2 = win_face.bottom()
+    
+    winner_weidth = int(winner_x2 - winner_x1)
+    winner_height = int(winner_y2 - winner_y1)
+    
+    
+    # hat
+    head_weidth = int(winner_weidth)
+    head_height = head_weidth
+    
+    def resize_hat(head_weidth, head_height):
+        hat = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\hat.png', cv.IMREAD_UNCHANGED)
+        resize_hat = cv.resize(hat, (head_weidth, head_height))
+        hat_mask_bgr = resize_hat[:, :, :3]
+        hat_alpha_ch = resize_hat[:, :, 3]
+        _, head_mask = cv.threshold(hat_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        head_part = cv.bitwise_and(hat_mask_bgr, hat_mask_bgr, mask=head_mask)
+        return head_mask, head_part
+    head_mask, head_part = resize_hat(head_weidth, head_height)
+    head_area_no_head = cv.bitwise_not(head_mask)
+    
+    central_head = (int((winner_x1+winner_x2)/2), int(winner_y1*0.7))
+    top_left_heed = (int(central_head[0]-(head_weidth/2)), int(central_head[1]-(head_height/2)))
+    head_area = record_image[top_left_heed[1]: top_left_heed[1]+head_height,
+                             top_left_heed[0]: top_left_heed[0]+head_weidth]
+    
+    winner_head_part = cv.bitwise_and(head_area, head_area, mask=head_area_no_head)
+    final_winner_head = cv.add(winner_head_part, head_part)
+    record_image[top_left_heed[1]: top_left_heed[1]+head_height,
+                 top_left_heed[0]: top_left_heed[0]+head_weidth] = final_winner_head
+    
+    return record_image
+
+
 # 如果有輸有贏的話，那就印出輸贏的結果
-if result == 1:
+if result == 3:
+    pass
+else:
     loser(record_image, loser_face)
+    winner(record_image, win_face)
 
 # show出結果
 cv.imshow('record_image',record_image)
