@@ -3,6 +3,7 @@ import numpy as np
 import dlib
 import random
 from math import hypot
+import sys
 
 stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
 paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
@@ -71,17 +72,18 @@ while True:
             if type == 0:
                 pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
                 first_choice = [1, 0, 0]
-                first_position = [(x1, y1), (x2, y2)]
+                first_face = face
 
             elif type == 1:
                 pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
                 first_choice = [0, 1, 0]
-                first_position = [(x1, y1), (x2, y2)]
+                first_face = face
 
             elif type == 2:
                 pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
                 first_choice = [0, 0, 1]
-                first_position = [(x1, y1), (x2, y2)]
+                first_face = face
+
             Round = 1
             # 第一張臉的出拳紀錄完成，下一輪要記錄第二張臉的出拳
 
@@ -90,17 +92,17 @@ while True:
             if type == 0:
                 pic_mask, pic_part = paper_change(stone, pic_width1, pic_hight1)
                 second_choice = [1, 0, 0]
-                second_position = [(x1, y1), (x2, y2)]
+                second_face = face
 
             elif type == 1:
                 pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
                 second_choice = [0, 1, 0]
-                second_position  = [(x1, y1), (x2, y2)]
+                second_face = face
 
             elif type == 2:
                 pic_mask, pic_part = paper_change(scissor, pic_width1, pic_hight1)
                 second_choice = [0, 0, 1]
-                second_position = [(x1, y1), (x2, y2)]
+                second_face = face
             Round = 0
             # 第二張臉的紀錄完成，可以重新記錄了
 
@@ -109,7 +111,7 @@ while True:
         pic_area = image[y1-pic_hight2 : y1+pic_hight1-pic_hight2,
                          x1+pic_width2 : x1+pic_width1+pic_width2]
 
-        face_part = cv.bitwise_and(pic_area, pic_area, mask=image_area_no_face)
+        face_part = cv.bitwise_and(pic_area, pic_area, mask=image_area_no_face)  # 有問題喔 因為臉超出範圍了
         final_part = cv.add(face_part, pic_part)
 
         image[y1-pic_hight2 : y1+pic_hight1-pic_hight2,
@@ -124,27 +126,73 @@ while True:
             cv.destroyAllWindows()
             break
 
-# 判斷誰輸誰贏
-first_person = first_choice.index(1)
-second_person = second_choice.index(1)
 
-# 一開始先預設second person win
-who_win = 2
-win_position = second_position
+# 判斷誰輸誰贏的function
+def who_win(first_choice, second_choice):
+    first_person = first_choice.index(1)
+    second_person = second_choice.index(1)
 
-# 平手
-if((first_person == 0 and second_person == 0) or (first_person == 1 and second_person == 1)
-    or (first_person == 2 and second_person == 2)):
-    who_win = 0
-    win_position = [(0,0), (50,50)]
+    # 一開始先預設second person win
+    who_win = 2
+    win_face = second_face
+    loser_face = first_face
 
-# first_person 贏
-elif((first_person == 0 and second_person == 2) or (first_person == 1 and second_person == 0)
-    or(first_person == 2 and second_person == 1)):
-    who_win = 1
-    win_position = first_position
+    # 平手
+    if((first_person == 0 and second_person == 0) or (first_person == 1 and second_person == 1)
+        or (first_person == 2 and second_person == 2)):
+        who_win = 0
+        print('平手')
+        sys.exit()
 
-# show出結果(這邊之後要處理照片)
+    # first_person 贏
+    elif((first_person == 0 and second_person == 2) or (first_person == 1 and second_person == 0)
+        or(first_person == 2 and second_person == 1)):
+        who_win = 1
+        win_face = first_face
+        loser_face = second_face
+    return win_face, loser_face
+
+win_face, loser_face = who_win(first_choice, second_choice)
+
+# 處理輸家的特效
+def loser(record_image, loser_face):
+    loser_x1 = loser_face.left()
+    loser_y1 = loser_face.top()
+    loser_x2 = loser_face.right()
+    loser_y2 = loser_face.bottom()
+
+    loser_width = int(loser_x2 - loser_x1)
+    loser_hight = int(loser_y2 - loser_y1)
+
+    loser_pic_width = loser_width // 2
+    loser_pic_hight = loser_hight // 2
+    loser_pic_width2 = loser_width // 4
+    loser_pic_hight2 = loser_hight // 4
+    
+    def resize_loser_pic(resize_width, resize_hight):
+        loser_pic = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\loser.png", cv.IMREAD_UNCHANGED)
+        resize_loser = cv.resize(loser_pic, (resize_width, resize_hight))
+        loser_mask_bgr = resize_loser[:, :, :3]
+        loser_alpha_ch = resize_loser[:, :, 3]
+        _, loser_mask = cv.threshold(loser_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        loser_part = cv.bitwise_and(loser_mask_bgr, loser_mask_bgr, mask=loser_mask)
+        return loser_mask, loser_part
+    loser_mask, loser_part = resize_loser_pic(loser_pic_width, loser_pic_hight)
+    loser_area_no_face = cv.bitwise_not(loser_mask)
+
+    loser_area = record_image[loser_y1-loser_pic_hight-loser_pic_hight2 : loser_y1-loser_pic_hight2,
+                              loser_x1+loser_pic_width2 : loser_x1+loser_pic_width2+loser_pic_width]
+
+    loser_face_part = cv.bitwise_and(loser_area, loser_area, mask=loser_area_no_face)
+    final_loser_part = cv.add(loser_face_part, loser_part)
+    record_image[loser_y1-loser_pic_hight-loser_pic_hight2 : loser_y1-loser_pic_hight2,
+                loser_x1+loser_pic_width2 : loser_x1+loser_pic_width2+loser_pic_width] = final_loser_part
+
+    return record_image
+
+loser(record_image, loser_face)
+
+# show出結果
 cv.imshow('record_image',record_image)
 key = cv.waitKey(0)
 cv.destroyAllWindows()
