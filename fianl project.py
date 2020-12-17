@@ -169,8 +169,35 @@ win_face, loser_face, result = who_win(first_choice, second_choice)
 
 
 # 處理平手的情況
-def tie():
-    peace = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\peace.png", )
+def tie(record_image):
+    record_image_height = record_image.shape[0]
+    record_image_width = record_image.shape[1]
+    
+    resize_width = int(record_image_width / 3)
+    resize_height = int(resize_width * 0.23)
+    
+    def resize_peace(resize_width, resize_height):
+        peace = cv.imread('C:\\Users\\user\\Desktop\\project\\PBC--final-project\\\\peace.png', cv.IMREAD_UNCHANGED)
+        resize_peace = cv.resize(peace, (resize_width, resize_height))
+    
+        peace_mask_bgr = resize_peace[:, :, :3]
+        peace_alpha_ch = resize_peace[:, :, 3]
+        _, tie_mask = cv.threshold(peace_alpha_ch, 220, 255, cv.THRESH_BINARY)
+        tie_part = cv.bitwise_and(peace_mask_bgr, peace_mask_bgr, mask=tie_mask)
+        return tie_mask, tie_part
+    tie_mask, tie_part = resize_peace(resize_width, resize_height)
+    tie_area_no_image = cv.bitwise_not(tie_mask)
+    
+    top_left = (int(record_image_width/2 - resize_width/2), int(record_image_height/2 - resize_height/2))
+    tie_area = record_image[top_left[1]: top_left[1]+resize_height,
+                            top_left[0]: top_left[0]+resize_width]
+                            
+    image_tie_part = cv.bitwise_and(tie_area, tie_area, mask=tie_area_no_image)
+    final_tie = cv.add(image_tie_part, tie_part)
+    record_image[top_left[1]: top_left[1]+resize_height,
+                 top_left[0]: top_left[0]+resize_width] = final_tie
+    
+    return record_image
     
 
 # 處理輸家的特效
@@ -309,9 +336,11 @@ def winner(record_image, win_face):
     return record_image
 
 # 如果有輸有贏的話，那就印出輸贏的結果
-if result == 1:
+if result == 3:
+    tie(record_image)
+else:
+    winner(record_image, win_face)
     loser(record_image, loser_face)
-    #winner(record_image, win_face)
 
 
 # show出結果
