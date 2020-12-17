@@ -4,9 +4,9 @@ import dlib
 import random
 from math import hypot
 
-stone = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png', cv.IMREAD_UNCHANGED)
-paper = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png', cv.IMREAD_UNCHANGED)
-scissor = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png', cv.IMREAD_UNCHANGED)
+stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
+paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
+scissor = cv.imread('C:\\Users\\user\\Desktop\\scissor.png', cv.IMREAD_UNCHANGED)
 
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
@@ -74,7 +74,7 @@ def paper_scissor_stone():
                 pic_y2 = y1+pic_hight1-pic_hight2
                 pic_x1 = x1+pic_width2
                 pic_x2 = x1+pic_width1+pic_width2
-                if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:
+                if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
                     # 三個函數隨機變動，所以剪刀石頭布可以隨機換
                     type = random.randrange(0, 3)
                     # 第一張臉的紀錄
@@ -120,16 +120,15 @@ def paper_scissor_stone():
                     image_area_no_face = cv.bitwise_not(pic_mask)
                     pic_area = image[pic_y1 : pic_y2, pic_x1 : pic_x2]
 
-                    face_part = cv.bitwise_and(pic_area, pic_area, mask=image_area_no_face)  # 有問題喔 因為臉超出範圍了
+                    face_part = cv.bitwise_and(pic_area, pic_area, mask=image_area_no_face)
                     final_part = cv.add(face_part, pic_part)
 
                     image[pic_y1 : pic_y2, pic_x1 : pic_x2] = final_part
-                else:  # 臉超出範圍的時候
+                else:  # 要放的圖超出範圍的時候
                     pass
 
         else:  # 沒有任何人臉的時候
             pass
-
             # 最後要show出的image的處理，然後show出
         cv.imshow('final', image)
         if cv.waitKey(1) &  0xFF == ord('q'):
@@ -168,10 +167,11 @@ def who_win(first_choice, second_choice):
 
 win_face, loser_face, result = who_win(first_choice, second_choice)
 
-'''
+
 # 處理平手的情況
 def tie():
-'''
+    peace = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\peace.png", )
+    
 
 # 處理輸家的特效
 def loser(record_image, loser_face):
@@ -183,35 +183,36 @@ def loser(record_image, loser_face):
     loser_width = int(loser_x2 - loser_x1)
     loser_hight = int(loser_y2 - loser_y1)
 
-    loser_pic_width = loser_width // 2
-    loser_pic_hight = loser_hight // 2
-    loser_pic_width2 = loser_width // 4
-    loser_pic_hight2 = loser_hight // 4
+    loser_pic_width = loser_width
+    loser_pic_hight = int(loser_width*0.32)
+    loser_pic_move_width = loser_width // 6
+    loser_pic_move_hight = loser_hight // 4
     
     def resize_loser_pic(resize_width, resize_hight):
-        loser_pic = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\loser.png", cv.IMREAD_UNCHANGED)
+        loser_pic = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\loser_new.png", cv.IMREAD_UNCHANGED)
         resize_loser = cv.resize(loser_pic, (resize_width, resize_hight))
         loser_mask_bgr = resize_loser[:, :, :3]
         loser_alpha_ch = resize_loser[:, :, 3]
         _, loser_mask = cv.threshold(loser_alpha_ch, 220, 255, cv.THRESH_BINARY)
         loser_part = cv.bitwise_and(loser_mask_bgr, loser_mask_bgr, mask=loser_mask)
         return loser_mask, loser_part
+
     loser_mask, loser_part = resize_loser_pic(loser_pic_width, loser_pic_hight)
     loser_area_no_face = cv.bitwise_not(loser_mask)
 
-    loser_area = record_image[loser_y1-loser_pic_hight-loser_pic_hight2 : loser_y1-loser_pic_hight2,
-                              loser_x1+loser_pic_width2 : loser_x1+loser_pic_width2+loser_pic_width]
+    loser_area = record_image[loser_y1-loser_pic_hight-loser_pic_move_hight : loser_y1-loser_pic_move_hight,
+                              loser_x1+loser_pic_move_width : loser_x1+loser_pic_width+loser_pic_move_width]
 
     loser_face_part = cv.bitwise_and(loser_area, loser_area, mask=loser_area_no_face)
     final_loser_part = cv.add(loser_face_part, loser_part)
-    record_image[loser_y1-loser_pic_hight-loser_pic_hight2 : loser_y1-loser_pic_hight2,
-                loser_x1+loser_pic_width2 : loser_x1+loser_pic_width2+loser_pic_width] = final_loser_part
+    record_image[loser_y1-loser_pic_hight-loser_pic_move_hight : loser_y1-loser_pic_move_hight,
+                loser_x1+loser_pic_move_width : loser_x1+loser_pic_width+loser_pic_move_width] = final_loser_part
 
     return record_image
 
 #處理贏家的特效
 def winner(record_image, win_face):
-    predictor = dlib.shape_predictor('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\shape_predictor_68_face_landmarks.dat')
+    predictor = dlib.shape_predictor("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\shape_predictor_68_face_landmarks.dat")
     landmarks = predictor(record_image, win_face)
     
     
@@ -223,7 +224,7 @@ def winner(record_image, win_face):
     mouth_height = int(mouth_width * 1.2)
     
     def resize_cigarette(mouth_width, mouth_height):
-        cigarette = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\cigarette.png', cv.IMREAD_UNCHANGED)
+        cigarette = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\cigarette.png", cv.IMREAD_UNCHANGED)
         resize_cigarette = cv.resize(cigarette, (mouth_width, mouth_height))
         cigarette_mask_bgr = resize_cigarette[:, :, :3]
         cigarette_alpha_ch = resize_cigarette[:, :, 3]
@@ -251,7 +252,7 @@ def winner(record_image, win_face):
     eye_height = int(eye_width * 0.22)
     
     def resize_glasses(eye_width, eye_height):
-        glasses = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\glasses.png', cv.IMREAD_UNCHANGED)
+        glasses = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\glasses.png", cv.IMREAD_UNCHANGED)
         resize_glasses = cv.resize(glasses, (eye_width, eye_height))
         glasses_mask_bgr = resize_glasses[:, :, :3]
         glasses_alpha_ch = resize_glasses[:, :, 3]
@@ -285,7 +286,7 @@ def winner(record_image, win_face):
     head_height = head_weidth
     
     def resize_hat(head_weidth, head_height):
-        hat = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\hat.png', cv.IMREAD_UNCHANGED)
+        hat = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\hat.png", cv.IMREAD_UNCHANGED)
         resize_hat = cv.resize(hat, (head_weidth, head_height))
         hat_mask_bgr = resize_hat[:, :, :3]
         hat_alpha_ch = resize_hat[:, :, 3]
@@ -307,13 +308,11 @@ def winner(record_image, win_face):
     
     return record_image
 
-
 # 如果有輸有贏的話，那就印出輸贏的結果
-if result == 3:
-    pass
-else:
+if result == 1:
     loser(record_image, loser_face)
-    winner(record_image, win_face)
+    #winner(record_image, win_face)
+
 
 # show出結果
 cv.imshow('record_image',record_image)
