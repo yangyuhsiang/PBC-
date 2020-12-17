@@ -168,37 +168,10 @@ def who_win(first_choice, second_choice):
 
 win_face, loser_face, result = who_win(first_choice, second_choice)
 
-
+'''
 # 處理平手的情況
-def tie(record_image):
-    record_image_height = record_image.shape[0]
-    record_image_width = record_image.shape[1]
-    
-    resize_width = int(record_image_width / 3)
-    resize_height = int(resize_width * 0.23)
-    
-    def resize_peace(resize_width, resize_height):
-        peace = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\peace.png', cv.IMREAD_UNCHANGED)
-        resize_peace = cv.resize(peace, (resize_width, resize_height))
-    
-        peace_mask_bgr = resize_peace[:, :, :3]
-        peace_alpha_ch = resize_peace[:, :, 3]
-        _, tie_mask = cv.threshold(peace_alpha_ch, 220, 255, cv.THRESH_BINARY)
-        tie_part = cv.bitwise_and(peace_mask_bgr, peace_mask_bgr, mask=tie_mask)
-        return tie_mask, tie_part
-    tie_mask, tie_part = resize_peace(resize_width, resize_height)
-    tie_area_no_image = cv.bitwise_not(tie_mask)
-    
-    top_left = (int(record_image_width/2 - resize_width/2), int(record_image_height/2 - resize_height/2))
-    tie_area = record_image[top_left[1]: top_left[1]+resize_height,
-                            top_left[0]: top_left[0]+resize_width]
-                            
-    image_tie_part = cv.bitwise_and(tie_area, tie_area, mask=tie_area_no_image)
-    final_tie = cv.add(image_tie_part, tie_part)
-    record_image[top_left[1]: top_left[1]+resize_height,
-                 top_left[0]: top_left[0]+resize_width] = final_tie
-    
-    return record_image
+def tie():
+'''
 
 # 處理輸家的特效
 def loser(record_image, loser_face):
@@ -303,41 +276,41 @@ def winner(record_image, win_face):
     winner_x2 = win_face.right()
     winner_y2 = win_face.bottom()
     
-    winner_width = int(winner_x2 - winner_x1)
+    winner_weidth = int(winner_x2 - winner_x1)
     winner_height = int(winner_y2 - winner_y1)
     
     
     # hat
-    head_width = int(winner_width)
-    head_height = head_width
+    head_weidth = int(winner_weidth)
+    head_height = head_weidth
     
-    def resize_hat(head_width, head_height):
+    def resize_hat(head_weidth, head_height):
         hat = cv.imread('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\hat.png', cv.IMREAD_UNCHANGED)
-        resize_hat = cv.resize(hat, (head_width, head_height))
+        resize_hat = cv.resize(hat, (head_weidth, head_height))
         hat_mask_bgr = resize_hat[:, :, :3]
         hat_alpha_ch = resize_hat[:, :, 3]
         _, head_mask = cv.threshold(hat_alpha_ch, 220, 255, cv.THRESH_BINARY)
         head_part = cv.bitwise_and(hat_mask_bgr, hat_mask_bgr, mask=head_mask)
         return head_mask, head_part
-    head_mask, head_part = resize_hat(head_width, head_height)
+    head_mask, head_part = resize_hat(head_weidth, head_height)
     head_area_no_head = cv.bitwise_not(head_mask)
     
     central_head = (int((winner_x1+winner_x2)/2), int(winner_y1*0.7))
-    top_left_heed = (int(central_head[0]-(head_width/2)), int(central_head[1]-(head_height/2)))
+    top_left_heed = (int(central_head[0]-(head_weidth/2)), int(central_head[1]-(head_height/2)))
     head_area = record_image[top_left_heed[1]: top_left_heed[1]+head_height,
-                             top_left_heed[0]: top_left_heed[0]+head_width]
+                             top_left_heed[0]: top_left_heed[0]+head_weidth]
     
     winner_head_part = cv.bitwise_and(head_area, head_area, mask=head_area_no_head)
     final_winner_head = cv.add(winner_head_part, head_part)
     record_image[top_left_heed[1]: top_left_heed[1]+head_height,
-                 top_left_heed[0]: top_left_heed[0]+head_width] = final_winner_head
+                 top_left_heed[0]: top_left_heed[0]+head_weidth] = final_winner_head
     
     return record_image
 
 
 # 如果有輸有贏的話，那就印出輸贏的結果
 if result == 3:
-    tie(record_image)
+    pass
 else:
     loser(record_image, loser_face)
     winner(record_image, win_face)
