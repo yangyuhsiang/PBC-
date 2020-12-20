@@ -11,19 +11,20 @@ def recvall(sock, count):
         count -= len(newbuf)
     return buf
 
-TCP_IP = "140.112.150.133"
+TCP_IP = socket.gethostname()
 TCP_PORT = 8002
 s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 s.bind((TCP_IP, TCP_PORT))
-s.listen(True)
+s.listen(5)
 conn, addr = s.accept()
-while 1:
+while True:
     length = recvall(conn,16)
     stringData = recvall(conn, int(length))
-    data = numpy.fromstring(stringData, dtype='uint8')
+    data = numpy.frombuffer(stringData, dtype='uint8')
     decimg=cv2.imdecode(data,1)
     cv2.imshow('SERVER',decimg)
     cv2.waitKey(30)
+    
 
 s.close()
 cv2.destroyAllWindows()

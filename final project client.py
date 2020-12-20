@@ -129,7 +129,7 @@ def paper_scissor_stone():
 final_image = paper_scissor_stone()
 
 
-TCP_IP = "140.112.150.133"  # 要改成自己電腦的IP
+TCP_IP = socket.gethostname()  # 要改成自己電腦的IP
 TCP_PORT = 8002
 sock = socket.socket()
 frame = final_image
@@ -137,6 +137,6 @@ sock.connect((TCP_IP, TCP_PORT))
 while True:
     result, imgencode = cv.imencode('.jpg', frame)
     data = np.array(imgencode)
-    stringData = data.tostring()
+    stringData = data.tobytes()
     sock.send( str(len(stringData)).ljust(16).encode())
     sock.send( stringData )
