@@ -4,6 +4,7 @@ import dlib
 import random
 import socket
 from math import hypot
+import select
 
 stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
 paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
@@ -128,15 +129,53 @@ def paper_scissor_stone():
     return final_image
 final_image = paper_scissor_stone()
 
-
+# 傳送結果的照片
 TCP_IP = socket.gethostname()  # 要改成自己電腦的IP
 TCP_PORT = 8002
-sock = socket.socket()
+client = socket.socket()
 frame = final_image
-sock.connect((TCP_IP, TCP_PORT))
+client.connect((TCP_IP, TCP_PORT))
+b = 0
 while True:
     result, imgencode = cv.imencode('.jpg', frame)
     data = np.array(imgencode)
     stringData = data.tobytes()
-    sock.send( str(len(stringData)).ljust(16).encode())
-    sock.send( stringData )
+    client.send( str(len(stringData)).ljust(16).encode())
+    client.send(stringData)
+    print('send first image')
+    # server按q之後就沒有在receive了
+
+    
+
+# 接收照片data然後處理的函數
+def recvall(sock, count):
+    buf = b''
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
+
+
+# 接收來自server的照片
+socks = [client]
+while True:
+    readySocks, _, _ = select.select(socks, [], [], 5)
+    for sock1 in readySocks:
+        length_client = recvall(sock1, 16)
+        stringData_client = recvall(sock1, int(length_client))
+        data_client = np.frombuffer(stringData_client, dtype='uint8')
+        decimg_client = cv.imdecode(data_client, 1)
+        cv.imshow('SERVER', decimg_client)
+        cv.destroyAllWindows()
+        print('second img receive from server')
+        key = cv.waitKey(1)
+        if key == ord('q'):
+            print('second img received and close')
+            cv.destroyAllWindows()
+            break
+
+client.close()
+
+
