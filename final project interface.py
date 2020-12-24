@@ -1,6 +1,7 @@
 import tkinter as tk
 import tkinter.font as tkFont
 import tkinter.messagebox
+from PIL import ImageTk
 
 
 class MainInterface(tk.Frame):
@@ -17,6 +18,8 @@ class MainInterface(tk.Frame):
         f2 = tkFont.Font(size=16, family='Courier New')
         # 主視窗以及右方回合、勝、負顯示
         self.cvsMain = tk.Canvas(self, height=600, width=800, bg='white')
+        self.game_image = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\Christmas_tree.jpg')
+        self.cvsMain.create_image(400, 300, image=self.game_image, anchor=tk.CENTER)
         self.lblRound = tk.Label(self, text='回合', height=1, width=4, font=f1)
         self.lblShowRound = tk.Label(self, text='4', height=1, width=4, font=f2)
         self.lblWin = tk.Label(self, text='勝', height=1, width=4, font=f1)
