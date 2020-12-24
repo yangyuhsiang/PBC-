@@ -24,6 +24,7 @@ except:
 
 connected_msg = client.recv(2048).decode()  # your are connected
 player_num = client.recv(2048).decode()  # player number
+print(player_num)
 
 
 # 按下確認connected後才開始進行
@@ -218,12 +219,12 @@ class MainInterface(tk.Frame):
     
     def send_request(self):  # 未完成
         if self.mode.get() == '七戰四勝':
-            pass
+            client.send('2'.encode())
         elif self.mode.get() == '五戰三勝':
-            pass
+            client.send('1'.encode())
         else:
-            pass
- 
+            client.send('0'.encode())
+
     
     def yes(self):  #未完成
         pass
@@ -242,9 +243,7 @@ main_inter.master.title('Paper Scissor Stone')
 video_stream()
 main_inter.mainloop()
 
-if player_num == '1':
-    game_mode = main_inter.mode.get()
-    client.send(str(game_mode).encode())
+
 
 
 
