@@ -12,9 +12,9 @@ import select
 
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -132,12 +132,7 @@ class MainInterfacePlayer1(tk.Frame):
         tk.Frame.__init__(self)
         self.grid()
         self.createWidgets()
-        self.recv_info()
     
-    def recv_info(self):
-        self.mode_yes_or_no = client.recv(2048).encode()
-        if self.mode_yes_or_no == 'N':
-            self.recv_no()
     
     def createWidgets(self):
         f1 = tkFont.Font(size=16, family='Microsoft JhengHei')
@@ -154,13 +149,13 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
+        self.stone = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
+        self.paper = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
@@ -216,26 +211,27 @@ class MainInterfacePlayer1(tk.Frame):
             client.send('1'.encode())
         else:
             client.send('0'.encode())
+        mode_yes_or_no = client.recv(2048).decode()
+        if mode_yes_or_no == 'N':
+            tkinter.messagebox.showinfo(title='重新選擇模式', message='對方要求重新選擇模式，請重新選擇')
+            self.createWidgets()
 
 
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
-
-
-    def recv_no(self):
-        self.recv_info()
     
 
     def scissor(self):
-        pass
+        client.send('s'.encode())
     
     
     def stone(self):
-        pass
+        client.send('r'.encode())
         
     
     def paper(self):
-        pass
+        client.send('p'.encode())
+
 
 
 class MainInterfacePlayer2(tk.Frame):
@@ -273,13 +269,13 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
+        self.stone = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
+        self.paper = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
@@ -339,15 +335,15 @@ class MainInterfacePlayer2(tk.Frame):
 
 
     def scissor(self):
-        pass
+        client.send('s'.encode())
     
     
     def stone(self):
-        pass
+        client.send('r'.encode())
         
     
     def paper(self):
-        pass
+        client.send('p'.encode())
 
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
