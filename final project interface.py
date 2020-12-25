@@ -12,9 +12,9 @@ import select
 
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("scissor.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -265,25 +265,28 @@ class MainInterfacePlayer1(tk.Frame):
     def createWidgets(self):
         f1 = tkFont.Font(size=16, family='Microsoft JhengHei')
         f2 = tkFont.Font(size=16, family='Courier New')
+        self.draw_count = 0
+        self.win_count = 0
+        self.lose_count = 0
         # 主視窗以及右方回合、勝、負顯示
         self.lblMain = tk.Label(self)
 
-        self.lblRound = tk.Label(self, text='回合', height=1, width=4, font=f1)
-        self.lblShowRound = tk.Label(self, text='4', height=1, width=4, font=f2)
+        self.lblDraw = tk.Label(self, text='平手', height=1, width=4, font=f1)
+        self.lblShowDraw = tk.Label(self, text='0', height=1, width=4, font=f2)
         self.lblWin = tk.Label(self, text='勝', height=1, width=4, font=f1)
-        self.lblShowWin = tk.Label(self, text='3', height=1, width=4, font=f2)
+        self.lblShowWin = tk.Label(self, text='0', height=1, width=4, font=f2)
         self.lblLose = tk.Label(self, text='負', height=1, width=4, font=f1)
-        self.lblShowLose = tk.Label(self, text='1', height=1, width=4, font=f2)
+        self.lblShowLose = tk.Label(self, text='0', height=1, width=4, font=f2)
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
+        self.stone = Image.open("rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
+        self.paper = Image.open("paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
@@ -308,8 +311,8 @@ class MainInterfacePlayer1(tk.Frame):
         
         # 排版
         self.lblMain.grid(row=2, rowspan=5, column=0, columnspan=6, sticky=tk.NE+tk.SW)
-        self.lblRound.grid(row=2, column=6, sticky=tk.NE+tk.SW)
-        self.lblShowRound.grid(row=3, column=6, sticky=tk.NE+tk.SW)
+        self.lblDraw.grid(row=2, column=6, sticky=tk.NE+tk.SW)
+        self.lblShowDraw.grid(row=3, column=6, sticky=tk.NE+tk.SW)
         self.lblWin.grid(row=4, column=6, sticky=tk.NE+tk.SW)
         self.lblShowWin.grid(row=5, column=6, sticky=tk.NE+tk.SW)
         self.lblLose.grid(row=6, column=6, sticky=tk.NE+tk.SW)
@@ -351,20 +354,47 @@ class MainInterfacePlayer1(tk.Frame):
 
     def scissor_fun(self):
         self.pressed = 1
-        print('s')
         client.send('S'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
     
     
     def stone_fun(self):
         self.pressed = 2
-        print('r')
         client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
         
     
     def paper_fun(self):
         self.pressed = 3
-        print('p')
         client.send('P'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
 
 
 
@@ -392,24 +422,28 @@ class MainInterfacePlayer2(tk.Frame):
     def createWidgets(self):
         f1 = tkFont.Font(size=16, family='Microsoft JhengHei')
         f2 = tkFont.Font(size=16, family='Courier New')
+        self.draw_count = 0
+        self.win_count = 0
+        self.lose_count = 0
         # 主視窗以及右方回合、勝、負顯示
         self.lblMain = tk.Label(self)
-        self.lblRound = tk.Label(self, text='回合', height=1, width=4, font=f1)
-        self.lblShowRound = tk.Label(self, text='4', height=1, width=4, font=f2)
+
+        self.lblDraw = tk.Label(self, text='平手', height=1, width=4, font=f1)
+        self.lblShowDraw = tk.Label(self, text='0', height=1, width=4, font=f2)
         self.lblWin = tk.Label(self, text='勝', height=1, width=4, font=f1)
-        self.lblShowWin = tk.Label(self, text='3', height=1, width=4, font=f2)
+        self.lblShowWin = tk.Label(self, text='0', height=1, width=4, font=f2)
         self.lblLose = tk.Label(self, text='負', height=1, width=4, font=f1)
-        self.lblShowLose = tk.Label(self, text='1', height=1, width=4, font=f2)
+        self.lblShowLose = tk.Label(self, text='0', height=1, width=4, font=f2)
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
+        self.stone = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
+        self.paper = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
@@ -434,8 +468,8 @@ class MainInterfacePlayer2(tk.Frame):
         
         # 排版
         self.lblMain.grid(row=2, rowspan=5, column=0, columnspan=6, sticky=tk.NE+tk.SW)
-        self.lblRound.grid(row=2, column=6, sticky=tk.NE+tk.SW)
-        self.lblShowRound.grid(row=3, column=6, sticky=tk.NE+tk.SW)
+        self.lblDraw.grid(row=2, column=6, sticky=tk.NE+tk.SW)
+        self.lblShowDraw.grid(row=3, column=6, sticky=tk.NE+tk.SW)
         self.lblWin.grid(row=4, column=6, sticky=tk.NE+tk.SW)
         self.lblShowWin.grid(row=5, column=6, sticky=tk.NE+tk.SW)
         self.lblLose.grid(row=6, column=6, sticky=tk.NE+tk.SW)
@@ -471,20 +505,47 @@ class MainInterfacePlayer2(tk.Frame):
 
     def scissor_fun(self):
         self.pressed = 1
-        print('s')
         client.send('S'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
     
     
     def stone_fun(self):
         self.pressed = 2
-        print('r')
         client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
         
     
     def paper_fun(self):
         self.pressed = 3
-        print('p')
         client.send('P'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.lblShowLose.configure(text=str(self.lose_count))
+        else:
+            self.draw_count += 1
+            self.lblShowDraw.configure(text=str(self.draw_count))
 
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
