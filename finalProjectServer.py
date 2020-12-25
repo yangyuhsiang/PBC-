@@ -17,17 +17,17 @@ def recvall(sock, count):
     return buf
 
 
-def rec1():
-    ans1 = conn1.recv(2048).decode(FORMAT)
-    return ans1
+# def rec1():
+#     ans1 = conn1.recv(2048).decode(FORMAT)
+#     return ans1
 
 
-def rec2():
-    ans2 = conn2.recv(2048).decode(FORMAT)
-    return ans2
+# def rec2():
+#     ans2 = conn2.recv(2048).decode(FORMAT)
+#     return ans2
 
-getAns1 = threading.Thread(target=rec1)
-getAns2 = threading.Thread(target=rec2)
+# getAns1 = threading.Thread(target=rec1)
+# getAns2 = threading.Thread(target=rec2)
 
 '''
 Conncection settings
@@ -100,12 +100,15 @@ while True:
     modeDecision = conn2.recv(2048).decode(FORMAT)
     print(modeDecision)
     if modeDecision == 'Y':
+        print('Player 2 accept gamemode')
         conn1.send('Y'.encode())
         break
     elif modeDecision == 'N':
+        print('Player 2 denied gamemode. ')
         conn1.send('N'.encode())
         continue
 
+print('Game Start!')
 
 '''
 Game start. Start receiving image and game decision
@@ -116,7 +119,8 @@ while True:
     #     msg_length1 = int(msg_length1)
 
     # getAns1.start()
-    ans1 = rec1()
+    ans1 = conn1.recv(2048).decode(FORMAT)
+    print(ans1)
 
     # length1 = recvall(conn1, 16)
     # stringData1 = recvall(conn1, int(length1))
@@ -132,7 +136,8 @@ while True:
     #     msg_length2 = int(msg_length2)
 
     # getAns2.start()
-    ans2 = rec2()
+    ans2 = conn2.recv(2048).decode(FORMAT)
+    print(ans2)
     
     # length2 = recvall(conn2, 16)
     # stringData2 = recvall(conn2, int(length2))
@@ -167,8 +172,8 @@ while True:
     conn1Win = 0
     conn2Win = 0
     winner = -1
-    ans1 = ans1.strip()
-    ans2 = ans2.strip()
+    # ans1 = ans1.strip()
+    # ans2 = ans2.strip()
 
     print(ans1)
     print(ans2)
