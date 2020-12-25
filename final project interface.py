@@ -24,13 +24,13 @@ except:
 
 connected_msg = client.recv(2048).decode()  # your are connected
 player_num = client.recv(2048).decode()  # player number
-print(player_num)  # test
+print(player_num)
 
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -203,13 +203,10 @@ class MainInterfacePlayer1(tk.Frame):
     
     def send_request(self):
         if self.mode.get() == '七戰四勝':
-            print('2')  # test
             client.send('2'.encode())
         elif self.mode.get() == '五戰三勝':
-            print('1')  # test
             client.send('1'.encode())
         else:
-            print('0')  # test
             client.send('0'.encode())
             
         
@@ -283,20 +280,12 @@ class MainInterfacePlayer2(tk.Frame):
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
-if player_num == '1':
-    main_inter = MainInterfacePlayer1()
-    main_inter.master.title('Paper Scissor Stone')
-    video_stream()
-    main_inter.mainloop()
-else:
-    game_mode = client.recv(2048).decode()
-    print(game_mode)  # test
-    player_one_addr = client.recv(2048).decode()
-    print(player_one_addr)  # test
-    main_inter = MainInterfacePlayer2()
-    main_inter.master.title('Paper Scissor Stone')
-    video_stream()
-    main_inter.mainloop()   
+
+main_inter = MainInterface()
+main_inter.master.title('Paper Scissor Stone')
+video_stream()
+main_inter.mainloop()
+
 
 
 
