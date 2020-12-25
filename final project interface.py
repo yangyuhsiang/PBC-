@@ -235,6 +235,7 @@ def only_stone(image):
 # 讀取相機的function
 
 def video_stream():
+    global frame
     ret, image = capture.read()
     if main_inter.pressed == 0:
         frame = paper_scissor_stone(image)
@@ -366,7 +367,7 @@ class MainInterfacePlayer1(tk.Frame):
             self.draw_count += 1
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            self.result_image = cv2image
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
@@ -390,7 +391,7 @@ class MainInterfacePlayer1(tk.Frame):
             self.draw_count += 1
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            self.result_image = cv2image
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
@@ -413,13 +414,23 @@ class MainInterfacePlayer1(tk.Frame):
             self.draw_count += 1
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            self.result_image = cv2image
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
                 stringData = data.tobytes()
                 client.send( str(len(stringData)).ljust(16).encode())
                 client.send(stringData)
+
+
+def recvall(sock, count):
+    buf = b''
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
 
 
 class MainInterfacePlayer2(tk.Frame):
@@ -471,7 +482,7 @@ class MainInterfacePlayer2(tk.Frame):
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_fun)
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=lambda:[self.stone_pressed(), self.stone_fun()])
         self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_fun)
         
         
@@ -533,45 +544,60 @@ class MainInterfacePlayer2(tk.Frame):
         ans = client.recv(2048).decode()
         if ans == 'W':
             self.win_count += 1
+            self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
             self.lose_count += 1
+            self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
         elif ans == 'D':
             self.draw_count += 1
+            self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            print(ans)
+            self.result_image = cv2image
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
                 stringData = data.tobytes()
                 client.send( str(len(stringData)).ljust(16).encode())
                 client.send(stringData)
-        
     
     
-    def stone_fun(self):
+    def stone_pressed(self):
         self.pressed = 2
+    def stone_fun(self):
         client.send('R'.encode())
         ans = client.recv(2048).decode()
         if ans == 'W':
             self.win_count += 1
+            self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
             self.lose_count += 1
+            self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
         elif ans == 'D':
             self.draw_count += 1
+            self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            print(ans)
+            self.imgFile = open('moonsave.png', 'w')  # 開始寫入圖片檔
+            self.imgData = frame
+            self.imgFile.write(self.imgData)
+            self.imgFile.close()
+            
+            print('start send image')
+            self.imgFile = open("moon.png", "rb")
             while True:
-                result, imgencode = cv.imencode('.jpg', self.result_image)
-                data = np.array(imgencode)
-                stringData = data.tobytes()
-                client.send( str(len(stringData)).ljust(16).encode())
-                client.send(stringData)
+                self.imgData = self.imgFile.readline(512)
+                if not self.imgData:
+                    break  # 讀完檔案結束迴圈
+            client.send(self.imgData)
+            self.imgFile.close()
+            print('transmit end')
         
     
     def paper_fun(self):
@@ -580,15 +606,19 @@ class MainInterfacePlayer2(tk.Frame):
         ans = client.recv(2048).decode()
         if ans == 'W':
             self.win_count += 1
+            self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
             self.lose_count += 1
+            self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
         elif ans == 'D':
             self.draw_count += 1
+            self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            self.result_image = imgtk
+            print(ans)
+            self.result_image = cv2image
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
