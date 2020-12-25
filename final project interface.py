@@ -12,9 +12,9 @@ import select
 
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -60,9 +60,9 @@ def face_change(img, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2):  # 把
     img[pic_y1 : pic_y2, pic_x1 : pic_x2] = final_part
 
     return img
+
 # 剪刀石頭布的function
-def paper_scissor_stone():
-    ret, image = capture.read()
+def paper_scissor_stone(image):
     final_image = image
     final_image = cv.flip(final_image, 1)
     image_hight = image.shape[0]
@@ -113,10 +113,137 @@ def paper_scissor_stone():
     return image
 
 
+def only_scissor(image):
+    final_image = image
+    final_image = cv.flip(final_image, 1)
+    image_hight = image.shape[0]
+    image_width = image.shape[1]
+    image = cv.flip(image, 1)
+    gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    faces = detector(gray_image, 0)
+
+    for face in faces:
+        # 找到臉的座標
+        x1 = face.left()
+        y1 = face.top()
+        x2 = face.right()
+        y2 = face.bottom()            
+
+        # 定義剪刀石頭布的高和寬
+        face_width = int(x2 - x1)
+        face_hight = int(y2 - y1)
+
+        pic_width1 = face_width//2  # 剪刀石頭布的圖要resize的寬跟高
+        pic_hight1 = face_hight//2
+
+        pic_width2 = face_width//4  # 剪刀石頭布的圖要放的位置
+        pic_hight2 = face_hight//4
+
+        # 如果要放圖的位置超過視窗，就不能繼續往下執行
+        pic_y1 = y1-pic_hight2
+        pic_y2 = y1+pic_hight1-pic_hight2
+        pic_x1 = x1+pic_width2
+        pic_x2 = x1+pic_width1+pic_width2
+
+        if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+            pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
+            image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+        else:
+            pass
+    return image
+
+
+def only_paper(image):
+    final_image = image
+    final_image = cv.flip(final_image, 1)
+    image_hight = image.shape[0]
+    image_width = image.shape[1]
+    image = cv.flip(image, 1)
+    gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    faces = detector(gray_image, 0)
+
+    for face in faces:
+        # 找到臉的座標
+        x1 = face.left()
+        y1 = face.top()
+        x2 = face.right()
+        y2 = face.bottom()            
+
+        # 定義剪刀石頭布的高和寬
+        face_width = int(x2 - x1)
+        face_hight = int(y2 - y1)
+
+        pic_width1 = face_width//2  # 剪刀石頭布的圖要resize的寬跟高
+        pic_hight1 = face_hight//2
+
+        pic_width2 = face_width//4  # 剪刀石頭布的圖要放的位置
+        pic_hight2 = face_hight//4
+
+        # 如果要放圖的位置超過視窗，就不能繼續往下執行
+        pic_y1 = y1-pic_hight2
+        pic_y2 = y1+pic_hight1-pic_hight2
+        pic_x1 = x1+pic_width2
+        pic_x2 = x1+pic_width1+pic_width2
+
+        if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+            pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
+            image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+        else:
+            pass
+    return image
+
+
+def only_stone(image):
+    final_image = image
+    final_image = cv.flip(final_image, 1)
+    image_hight = image.shape[0]
+    image_width = image.shape[1]
+    image = cv.flip(image, 1)
+    gray_image = cv.cvtColor(image, cv.COLOR_BGR2GRAY)
+    faces = detector(gray_image, 0)
+
+    for face in faces:
+        # 找到臉的座標
+        x1 = face.left()
+        y1 = face.top()
+        x2 = face.right()
+        y2 = face.bottom()            
+
+        # 定義剪刀石頭布的高和寬
+        face_width = int(x2 - x1)
+        face_hight = int(y2 - y1)
+
+        pic_width1 = face_width//2  # 剪刀石頭布的圖要resize的寬跟高
+        pic_hight1 = face_hight//2
+
+        pic_width2 = face_width//4  # 剪刀石頭布的圖要放的位置
+        pic_hight2 = face_hight//4
+
+        # 如果要放圖的位置超過視窗，就不能繼續往下執行
+        pic_y1 = y1-pic_hight2
+        pic_y2 = y1+pic_hight1-pic_hight2
+        pic_x1 = x1+pic_width2
+        pic_x2 = x1+pic_width1+pic_width2
+
+        if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+            pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
+            image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+        else:
+            pass
+    return image
+
 # 讀取相機的function
 
 def video_stream():
-    frame = paper_scissor_stone()
+    ret, image = capture.read()
+    if main_inter.pressed == 0:
+        frame = paper_scissor_stone(image)
+    elif main_inter.pressed == 1:  # scissor
+        frame = only_scissor(image)
+    elif main_inter.pressed == 2:  # rock
+        frame = only_stone(image)
+    else:  # paper
+        frame = only_paper(image)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -132,6 +259,7 @@ class MainInterfacePlayer1(tk.Frame):
         tk.Frame.__init__(self)
         self.grid()
         self.createWidgets()
+        self.pressed = 0
     
     
     def createWidgets(self):
@@ -149,13 +277,13 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png")
+        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png")
+        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
@@ -222,16 +350,19 @@ class MainInterfacePlayer1(tk.Frame):
     
 
     def scissor_fun(self):
+        self.pressed = 1
         print('s')
         client.send('S'.encode())
     
     
     def stone_fun(self):
+        self.pressed = 2
         print('r')
         client.send('R'.encode())
         
     
     def paper_fun(self):
+        self.pressed = 3
         print('p')
         client.send('P'.encode())
 
@@ -245,7 +376,7 @@ class MainInterfacePlayer2(tk.Frame):
         self.grid()
         self.recv_info()
         self.createWidgets()
-
+        self.pressed = 0
 
     def recv_info(self):
         self.game_mode = client.recv(2048).decode()
@@ -272,13 +403,13 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png")
+        self.stone = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png")
         self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
         self.stone_tk = ImageTk.PhotoImage(self.stone)
-        self.paper = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png")
+        self.paper = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png")
         self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
         self.paper_tk = ImageTk.PhotoImage(self.paper)
-        self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
+        self.scissor = Image.open("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
@@ -326,7 +457,8 @@ class MainInterfacePlayer2(tk.Frame):
     
     def yes(self):
         client.send('Y'.encode())
-    
+        
+
     
     def no(self):
         client.send('N'.encode())
@@ -338,16 +470,19 @@ class MainInterfacePlayer2(tk.Frame):
 
 
     def scissor_fun(self):
+        self.pressed = 1
         print('s')
         client.send('S'.encode())
     
     
     def stone_fun(self):
+        self.pressed = 2
         print('r')
         client.send('R'.encode())
         
     
     def paper_fun(self):
+        self.pressed = 3
         print('p')
         client.send('P'.encode())
 
