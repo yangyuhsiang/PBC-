@@ -12,9 +12,12 @@ import select
 
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
+paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
+scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -148,6 +151,12 @@ class MainInterfacePlayer1(tk.Frame):
         self.lblShowLose = tk.Label(self, text='1', height=1, width=4, font=f2)
         
         
+        # 剪刀石頭布按鈕
+        self.btnScissor = tk.Button(self, image=scissor_tk, command=self.scissor)
+        self.btnStone = tk.Button(self, image=stone_tk, command=self.stone)
+        self.btnPaper = tk.Button(self, image=paper_tk, command=self.paper)
+        
+        
         # 上方選擇模式欄
         self.mode = tk.StringVar()
         self.lblMode = tk.Label(self, text='選擇模式', height=1, width=16, font=f1)
@@ -164,7 +173,7 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 排版
-        self.lblMain.grid(row=2, rowspan=6, column=0, columnspan=6, sticky=tk.NE+tk.SW)
+        self.lblMain.grid(row=2, rowspan=5, column=0, columnspan=6, sticky=tk.NE+tk.SW)
         self.lblRound.grid(row=2, column=6, sticky=tk.NE+tk.SW)
         self.lblShowRound.grid(row=3, column=6, sticky=tk.NE+tk.SW)
         self.lblWin.grid(row=4, column=6, sticky=tk.NE+tk.SW)
@@ -179,6 +188,10 @@ class MainInterfacePlayer1(tk.Frame):
         self.btnSend.grid(row=0, rowspan=2, column=4)
         
         self.btnIns.grid(row=0, rowspan=2, column=6)
+        
+        self.btnScissor.grid(row=7, column=0)
+        self.btnStone.grid(row=7, column=2)
+        self.btnPaper.grid(row=7, column=4)
     
     
     def print_selection(self):
@@ -196,6 +209,18 @@ class MainInterfacePlayer1(tk.Frame):
 
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
+
+
+    def scissor(self):
+        pass
+    
+    
+    def stone(self):
+        pass
+        
+    
+    def paper(self):
+        pass
 
 
 class MainInterfacePlayer2(tk.Frame):
@@ -231,6 +256,12 @@ class MainInterfacePlayer2(tk.Frame):
         self.lblShowLose = tk.Label(self, text='1', height=1, width=4, font=f2)
         
         
+        # 剪刀石頭布按鈕
+        self.btnScissor = tk.Button(self, image=scissor_tk, command=self.scissor)
+        self.btnStone = tk.Button(self, image=stone_tk, command=self.stone)
+        self.btnPaper = tk.Button(self, image=paper_tk, command=self.paper)
+        
+        
         # 上方接受挑戰欄
         self.lblText1 = tk.Label(self, text='是否接受來自', height=1, width=12, font=f1)
         self.lblCom = tk.Label(self, text=self.player1_addr, height=1, width=13, font=f2)
@@ -246,7 +277,7 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 排版
-        self.lblMain.grid(row=2, rowspan=6, column=0, columnspan=6, sticky=tk.NE+tk.SW)
+        self.lblMain.grid(row=2, rowspan=5, column=0, columnspan=6, sticky=tk.NE+tk.SW)
         self.lblRound.grid(row=2, column=6, sticky=tk.NE+tk.SW)
         self.lblShowRound.grid(row=3, column=6, sticky=tk.NE+tk.SW)
         self.lblWin.grid(row=4, column=6, sticky=tk.NE+tk.SW)
@@ -263,6 +294,10 @@ class MainInterfacePlayer2(tk.Frame):
         
         self.btnIns.grid(row=0, rowspan=2, column=6)
  
+        self.btnScissor.grid(row=7, column=0)
+        self.btnStone.grid(row=7, column=2)
+        self.btnPaper.grid(row=7, column=4)
+        
     
     def yes(self):  #未完成
         client.send('Y'.encode())
@@ -274,6 +309,18 @@ class MainInterfacePlayer2(tk.Frame):
         
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
+
+
+    def scissor(self):
+        pass
+    
+    
+    def stone(self):
+        pass
+        
+    
+    def paper(self):
+        pass
 
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
