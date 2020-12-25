@@ -15,9 +15,6 @@ import select
 stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
 paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
 scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
-stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
-paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
-scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -152,9 +149,15 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.btnScissor = tk.Button(self, image=scissor_tk, command=self.scissor)
-        self.btnStone = tk.Button(self, image=stone_tk, command=self.stone)
-        self.btnPaper = tk.Button(self, image=paper_tk, command=self.paper)
+        self.stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
+        self.stone_tk = self.stone_tk.zoom(0.75, 0.64)
+        self.paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
+        self.paper_tk = self.paper_tk.zoom(0.55, 0.49)
+        self.scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
+        self.scissor_tk = self.scissor_tk.zoom(0.67, 0.47)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
         
         
         # 上方選擇模式欄
@@ -257,9 +260,16 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.btnScissor = tk.Button(self, image=scissor_tk, command=self.scissor)
-        self.btnStone = tk.Button(self, image=stone_tk, command=self.stone)
-        self.btnPaper = tk.Button(self, image=paper_tk, command=self.paper)
+        self.stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
+        self.stone_tk = self.stone_tk.zoom(0.75, 0.64)
+        self.paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
+        self.paper_tk = self.paper_tk.zoom(0.55, 0.49)
+        self.scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
+        self.scissor_tk = self.scissor_tk.zoom(0.67, 0.47)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
+        
         
         
         # 上方接受挑戰欄
