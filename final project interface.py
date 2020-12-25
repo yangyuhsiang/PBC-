@@ -158,9 +158,9 @@ class MainInterfacePlayer1(tk.Frame):
         self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_fun)
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_fun)
         
         
         # 上方選擇模式欄
@@ -221,16 +221,19 @@ class MainInterfacePlayer1(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
     
 
-    def scissor(self):
-        client.send('s'.encode())
+    def scissor_fun(self):
+        print('s')
+        client.send('S'.encode())
     
     
-    def stone(self):
-        client.send('r'.encode())
+    def stone_fun(self):
+        print('r')
+        client.send('R'.encode())
         
     
-    def paper(self):
-        client.send('p'.encode())
+    def paper_fun(self):
+        print('p')
+        client.send('P'.encode())
 
 
 
@@ -278,9 +281,9 @@ class MainInterfacePlayer2(tk.Frame):
         self.scissor = Image.open("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_fun)
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_fun)
         
         
         
@@ -321,11 +324,11 @@ class MainInterfacePlayer2(tk.Frame):
         self.btnPaper.grid(row=7, column=4)
         
     
-    def yes(self):  #未完成
+    def yes(self):
         client.send('Y'.encode())
     
     
-    def no(self):  # 未完成
+    def no(self):
         client.send('N'.encode())
         self.recv_info()
         self.createWidgets()
@@ -334,16 +337,19 @@ class MainInterfacePlayer2(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
-    def scissor(self):
-        client.send('s'.encode())
+    def scissor_fun(self):
+        print('s')
+        client.send('S'.encode())
     
     
-    def stone(self):
-        client.send('r'.encode())
+    def stone_fun(self):
+        print('r')
+        client.send('R'.encode())
         
     
-    def paper(self):
-        client.send('p'.encode())
+    def paper_fun(self):
+        print('p')
+        client.send('P'.encode())
 
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
