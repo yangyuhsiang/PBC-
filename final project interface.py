@@ -10,27 +10,11 @@ import socket
 from math import hypot
 import select
 
-# 先顯示已經連線的視窗
-FORMAT = 'utf-8'
-SERVER = '10.46.246.238'
-PORT = 5050
-ADDR = (SERVER, PORT)
-client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-
-try:
-    client.connect(ADDR)
-except:
-    print('connetion fail')  # 可以加一個視窗是連線失敗
-
-connected_msg = client.recv(2048).decode()  # your are connected
-player_num = client.recv(2048).decode()  # player number
-print(player_num)
-
 
 # 按下確認connected後才開始進行
-stone = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
-paper = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
-scissor = cv.imread("C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
+stone = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\rock.png", cv.IMREAD_UNCHANGED)
+paper = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\paper.png", cv.IMREAD_UNCHANGED)
+scissor = cv.imread("C:\\Users\\user\\Desktop\\project\\PBC--final-project\\scissor.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -208,8 +192,8 @@ class MainInterfacePlayer1(tk.Frame):
             client.send('1'.encode())
         else:
             client.send('0'.encode())
-            
-        
+
+
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
@@ -220,8 +204,19 @@ class MainInterfacePlayer2(tk.Frame):
     def __init__(self):
         tk.Frame.__init__(self)
         self.grid()
+        self.recv_info()
         self.createWidgets()
-    
+
+
+    def recv_info(self):
+        self.game_mode = client.recv(2048).decode()
+        if self.game_mode == '0':
+            self.mode = '三戰兩勝'
+        elif self.game_mode == '1':
+            self.mode = '五戰三勝'
+        elif self.game_mode == '2':
+            self.mode = '七戰四勝'
+        self.player1_addr = client.recv(2048).decode()
     
     def createWidgets(self):
         f1 = tkFont.Font(size=16, family='Microsoft JhengHei')
@@ -238,8 +233,8 @@ class MainInterfacePlayer2(tk.Frame):
         
         # 上方接受挑戰欄
         self.lblText1 = tk.Label(self, text='是否接受來自', height=1, width=12, font=f1)
-        self.lblCom = tk.Label(self, text='192.168.1.100', height=1, width=13, font=f2)
-        self.lblReMode = tk.Label(self, text='五戰三勝', height=1, width=8, font=f1)
+        self.lblCom = tk.Label(self, text=self.player1_addr, height=1, width=13, font=f2)
+        self.lblReMode = tk.Label(self, text=self.mode, height=1, width=8, font=f1)
         self.lblText2 = tk.Label(self, text='的挑戰', height=1, width=6, font=f1)
 
         self.btnY = tk.Button(self, text='是', height=1, width=4, command=self.yes, font=f1)
@@ -270,11 +265,11 @@ class MainInterfacePlayer2(tk.Frame):
  
     
     def yes(self):  #未完成
-        pass
+        client.send('Y'.encode())
     
     
     def no(self):  # 未完成
-        pass
+        client.send('N'.encode())
         
         
     def instruction(self):  # 這裡放出拳的說明
@@ -283,16 +278,33 @@ class MainInterfacePlayer2(tk.Frame):
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
 if msg_box == 'yes':
+    # 先顯示已經連線的視窗
+    FORMAT = 'utf-8'
+    SERVER = '10.46.246.238'
+    PORT = 5050
+    ADDR = (SERVER, PORT)
+    client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+    try:
+        client.connect(ADDR)
+    except:
+        print('connetion fail')  # 可以加一個視窗是連線失敗
+
+    connected_msg = client.recv(2048).decode()  # your are connected
+    player_num = client.recv(2048).decode()  # player number
+    print(player_num)
+
     if player_num == '1':
-    main_inter = MainInterfacePlayer1()
-    main_inter.master.title('Paper Scissor Stone')
-    video_stream()
-    main_inter.mainloop()
+        main_inter = MainInterfacePlayer1()
+        main_inter.master.title('Paper Scissor Stone')
+        video_stream()
+        main_inter.mainloop()
     else:
-    main_inter = MainInterfacePlayer2()
-    main_inter.master.title('Paper Scissor Stone')
-    video_stream()
-    main_inter.mainloop()
+        main_inter = MainInterfacePlayer2()
+        main_inter.master.title('Paper Scissor Stone')
+        video_stream()
+        main_inter.mainloop()
+
 
 
 
