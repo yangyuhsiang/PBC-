@@ -9,7 +9,6 @@ import select
 stone = cv.imread('C:\\Users\\user\\Desktop\\rock.png', cv.IMREAD_UNCHANGED)
 paper = cv.imread('C:\\Users\\user\\Desktop\\paper.png', cv.IMREAD_UNCHANGED)
 scissor = cv.imread('C:\\Users\\user\\Desktop\\scissor.png', cv.IMREAD_UNCHANGED)
-
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -142,11 +141,10 @@ while True:
     stringData = data.tobytes()
     client.send( str(len(stringData)).ljust(16).encode())
     client.send(stringData)
-    print('send first image')
     # server按q之後就沒有在receive了
 
     
-
+'''
 # 接收照片data然後處理的函數
 def recvall(sock, count):
     buf = b''
@@ -175,7 +173,7 @@ while True:
             print('second img received and close')
             cv.destroyAllWindows()
             break
-
+'''
 client.close()
 
 
