@@ -149,12 +149,15 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
-        self.stone_tk = self.stone_tk.zoom(0.75, 0.64)
-        self.paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
-        self.paper_tk = self.paper_tk.zoom(0.55, 0.49)
-        self.scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
-        self.scissor_tk = self.scissor_tk.zoom(0.67, 0.47)
+        self.stone = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
+        self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
+        self.stone_tk = ImageTk.PhotoImage(self.stone)
+        self.paper = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
+        self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
+        self.paper_tk = ImageTk.PhotoImage(self.paper)
+        self.scissor = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
+        self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
+        self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
         self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
         self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
@@ -260,12 +263,15 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 剪刀石頭布按鈕
-        self.stone_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
-        self.stone_tk = self.stone_tk.zoom(0.75, 0.64)
-        self.paper_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
-        self.paper_tk = self.paper_tk.zoom(0.55, 0.49)
-        self.scissor_tk = ImageTk.PhotoImage(file='C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
-        self.scissor_tk = self.scissor_tk.zoom(0.67, 0.47)
+        self.stone = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\rock.png')
+        self.stone = self.stone.resize((50,50), Image.ANTIALIAS)
+        self.stone_tk = ImageTk.PhotoImage(self.stone)
+        self.paper = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\paper.png')
+        self.paper = self.paper.resize((50, 50), Image.ANTIALIAS)
+        self.paper_tk = ImageTk.PhotoImage(self.paper)
+        self.scissor = Image.open('C:\\Users\\Ian Su\\Desktop\\PBC--final-project\\scissor.png')
+        self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
+        self.scissor_tk = ImageTk.PhotoImage(self.scissor)
         self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor)
         self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone)
         self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper)
