@@ -281,10 +281,18 @@ class MainInterfacePlayer2(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
-main_inter = MainInterface()
-main_inter.master.title('Paper Scissor Stone')
-video_stream()
-main_inter.mainloop()
+msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
+if msg_box == 'yes':
+    if player_num == '1':
+    main_inter = MainInterfacePlayer1()
+    main_inter.master.title('Paper Scissor Stone')
+    video_stream()
+    main_inter.mainloop()
+    else:
+    main_inter = MainInterfacePlayer2()
+    main_inter.master.title('Paper Scissor Stone')
+    video_stream()
+    main_inter.mainloop()
 
 
 
