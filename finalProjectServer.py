@@ -1,7 +1,9 @@
 import socket
 import numpy as np
 import cv2 as cv
+import threading
 from PIL import Image
+from queue import Queue
 
 
 def recvall(sock, count):
@@ -14,6 +16,18 @@ def recvall(sock, count):
         count -= len(newbuf)
     return buf
 
+
+def rec1():
+    ans1 = conn1.recv(2048).decode(FORMAT)
+    return ans1
+
+
+def rec2():
+    ans2 = conn2.recv(2048).decode(FORMAT)
+    return ans2
+
+getAns1 = threading.Thread(target=rec1)
+getAns2 = threading.Thread(target=rec2)
 
 '''
 Conncection settings
@@ -79,19 +93,19 @@ while True:
     elif gameMode == '2':
         modeString = "Best of Seven"
 
-    print(gameMode)
+    print(modeString)
 
-    conn2.send(str(modeString).encode())
-    conn2.send(str(addr2).encode())
+    conn2.send(str(gameMode).encode())
+    conn2.send(str(addr1[0]).encode())
     modeDecision = conn2.recv(2048).decode(FORMAT)
-    try:
-        if modeDecision == 'Y':
-            break
-        elif modeDecision == 'N':
-            continue
-    except:
-        print('Game mode undefined')
+    print(modeDecision)
+    if modeDecision == 'Y':
+        conn1.send('Y'.encode())
+        break
+    elif modeDecision == 'N':
+        conn1.send('N'.encode())
         continue
+
 
 '''
 Game start. Start receiving image and game decision
@@ -100,46 +114,53 @@ while True:
     # msg_length1 = conn1.recv(HEADER).decode(FORMAT)
     # if msg_length1:
     #     msg_length1 = int(msg_length1)
-    ans1 = conn1.recv(2048).decode(FORMAT)
-    length1 = recvall(conn1, 16)
-    stringData1 = recvall(conn1, int(length1))
-    data1 = np.frombuffer(stringData1, dtype='uint8')
-    decimg1 = cv.imdecode(data1, 1)
-    cv.imshow('SERVER', decimg1)
-    key1 = cv.waitKey(1)
-    if key1 == ord('q'):
-        print('first img receive and close')
+
+    # getAns1.start()
+    ans1 = rec1()
+
+    # length1 = recvall(conn1, 16)
+    # stringData1 = recvall(conn1, int(length1))
+    # data1 = np.frombuffer(stringData1, dtype='uint8')
+    # decimg1 = cv.imdecode(data1, 1)
+    # cv.imshow('SERVER', decimg1)
+    # key1 = cv.waitKey(1)
+    # if key1 == ord('q'):
+    #     print('first img receive and close')
 
     # msg_length2 = conn2.recv(HEADER).decode(FORMAT)
     # if msg_length2:
     #     msg_length2 = int(msg_length2)
-    ans2 = conn2.recv(2048).decode(FORMAT)
-    length2 = recvall(conn2, 16)
-    stringData2 = recvall(conn2, int(length2))
-    data2 = np.frombuffer(stringData2, dtype='uint8')
-    decimg2 = cv.imdecode(data2, 1)
-    cv.imshow('SERVER', decimg2)
-    key2 = cv.waitKey(1)
-    if key2 == ord('q'):
-        print('first img receive and close')
 
+    # getAns2.start()
+    ans2 = rec2()
+    
+    # length2 = recvall(conn2, 16)
+    # stringData2 = recvall(conn2, int(length2))
+    # data2 = np.frombuffer(stringData2, dtype='uint8')
+    # decimg2 = cv.imdecode(data2, 1)
+    # cv.imshow('SERVER', decimg2)
+    # key2 = cv.waitKey(1)
+    # if key2 == ord('q'):
+    #     print('first img receive and close')
+
+    # getAns2.join()
 
 # Image processed and merge forfurther usage
 # Read the two images
-    image1 = Image.open(decimg1)
-    image1.show()
-    image2 = Image.open(decimg2)
-    image2.show()
-    # resize, first image
-    image1 = image1.resize((426, 240))
-    image1_size = image1.size
-    image2_size = image2.size
-    new_image = Image.new(
-        'RGB', (2*image1_size[0], image1_size[1]), (250, 250, 250))
-    new_image.paste(image1, (0, 0))
-    new_image.paste(image2, (image1_size[0], 0))
-    new_image.save("images/merged_image.jpg", "JPEG")
-    new_image.show()
+    # image1 = Image.open(decimg1)
+    # image1.show()
+    # image2 = Image.open(decimg2)
+    # image2.show()
+    # # resize, first image
+    # image1 = image1.resize((426, 240))
+    # image1_size = image1.size
+    # image2_size = image2.size
+    # new_image = Image.new(
+    #     'RGB', (2*image1_size[0], image1_size[1]), (250, 250, 250))
+    # new_image.paste(image1, (0, 0))
+    # new_image.paste(image2, (image1_size[0], 0))
+    # new_image.save("images/merged_image.jpg", "JPEG")
+    # new_image.show()
 
 # Determine game outcome
 
@@ -173,22 +194,22 @@ while True:
             winner = 1
     if winner == -1:
         conn1.send('Draw.'.encode())
-        conn1.send(new_image)
+        # conn1.send(new_image)
         conn2.send('Draw.'.encode())
-        conn2.send(new_image)
+        # conn2.send(new_image)
     elif winner == 0:
         conn1Win += 1
         conn1.send('Nice! Won a round!'.encode())
-        conn1.send(new_image)
+        # conn1.send(new_image)
         conn2.send('Oops, lose a round'.encode())
-        conn2.send(new_image)
+        # conn2.send(new_image)
 
     elif winner == 1:
         conn2Win += 1
         conn1.send('Oops, lose a round'.encode())
-        conn1.send(new_image)
+        # conn1.send(new_image)
         conn2.send('Nice! Won a round!'.encode())
-        conn2.send(new_image)
+        # conn2.send(new_image)
 
     if gameMode == 0:
         if conn1Win == 2:
