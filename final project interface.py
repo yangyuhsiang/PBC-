@@ -229,7 +229,7 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='遊戲\n說明', height=2, width=4, command=self.instruction, font=f1)
+        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
         
         
         # 排版
@@ -272,7 +272,8 @@ class MainInterfacePlayer1(tk.Frame):
 
 
     def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
+        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
+        cv.imwrite('game pic.png', frame)
 
 
     def scissor_pressed(self):
@@ -402,7 +403,7 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='遊戲\n說明', height=2, width=4, command=self.instruction, font=f1)
+        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
 
 
         # 排版
@@ -439,7 +440,8 @@ class MainInterfacePlayer2(tk.Frame):
         
         
     def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
+        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
+        cv.imwrite('game pic.png', frame)
 
 
     def scissor_pressed(self):
