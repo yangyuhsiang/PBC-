@@ -36,8 +36,6 @@ def check_connection():
             start()
 
 
-connectionChecker = threading.Thread(target=check_connection)
-
 '''
 Connection initiated
 '''
@@ -50,6 +48,9 @@ FORMAT = 'utf-8'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 start()
+
+# connectionChecker=threading.Thread(target = check_connection)
+# connectionChecker.start()
 
 # Game mode selection. 0 for bo3, 1 for bo5, 2 for bo7.
 # conn1.send("Please select game mode.".encode())
@@ -73,7 +74,7 @@ while True:
         print('Player 2 accept gamemode')
         conn1.send('Y'.encode())
         break
-    elif modeDecision == 'N':
+    else:
         print('Player 2 denied gamemode. ')
         conn1.send('N'.encode())
         continue
@@ -96,11 +97,9 @@ while True:
 
     if ans1 != 'R' and ans1 != 'P' and ans1 != 'S':
         print('Value Error')
-        conn1.send('Bad Value'.encode())
         continue
     elif ans2 != 'R' and ans2 != 'P' and ans2 != 'S':
         print('Value Error')
-        conn2.send('Bad Value'.encode())
         continue
     else:
         if ans1 == "R" and ans2 == "S":
@@ -123,48 +122,42 @@ while True:
         conn1Win += 1
         print('Player 1', conn1Win)
         print('Player 2', conn2Win)
-        if conn1Win == 2:
-            if gameMode == '0':
-                conn1.send('BW'.encode())
-                conn2.send('BL'.encode())
+        if conn1Win == 2 and gameMode == '0':
+            conn1.send('BW'.encode())
+            conn2.send('BL'.encode())
             break
-        elif conn1Win == 3:
-            if gameMode == '1':
-                conn1.send('BW'.encode())
-                conn2.send('BL'.encode())
+        elif conn1Win == 3 and gameMode == '1':
+            conn1.send('BW'.encode())
+            conn2.send('BL'.encode())
             break
-        elif conn1Win == 4:
-            if gameMode == '2':
-                conn1.send('BW'.encode())
-                conn2.send('BL'.encode())
+        elif conn1Win == 4 and gameMode == '2':
+            conn1.send('BW'.encode())
+            conn2.send('BL'.encode())
             break
         else:
             conn1.send('W'.encode())
             conn2.send('L'.encode())
-
+            continue
     elif winner == 1:
         conn2Win += 1
         print('Player 1', conn1Win)
         print('Player 2', conn2Win)
-        if conn2Win == 2:
-            if gameMode == '0':
-                conn1.send('BL'.encode())
-                conn2.send('BW'.encode())
+        if conn2Win == 2 and gameMode == '0':
+            conn1.send('BL'.encode())
+            conn2.send('BW'.encode())
             break
-        elif conn2Win == 3:
-            if gameMode == '1':
-                conn1.send('BL'.encode())
-                conn2.send('BW'.encode())
+        elif conn2Win == 3 and gameMode == '1':
+            conn1.send('BL'.encode())
+            conn2.send('BW'.encode())
             break
-        elif conn2Win == 4:
-            if gameMode == '2':
-                conn1.send('BL'.encode())
-                conn2.send('BW'.encode())
+        elif conn2Win == 4 and gameMode == '2':
+            conn1.send('BL'.encode())
+            conn2.send('BW'.encode())
             break
         else:
             conn1.send('L'.encode())
             conn2.send('W'.encode())
-
+            continue
 # Potential lines to send pictures across clients
 # print(decimg1)
 # print(decimg2)
