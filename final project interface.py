@@ -50,6 +50,22 @@ def scissor_change(scissor, w1, h1):
     return pic_mask, pic_part
 
 
+'''new'''
+# 每一局贏的人的小特效
+def small_winer_effect():
+    pass
+
+
+# small_lose的大小調整函數，還有遮罩的函數
+def small_loser_effect(sad_face ,w1, h1):
+    resize_sad_face = cv.resize(sad_face, (w1, h1))
+    sad_face_mask_bgr = resize_sad_face[:, :, :3]
+    sad_face_alpha_ch = resize_sad_face[:, :, 3]
+    _, pic_mask = cv.threshold(sad_face_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(sad_face_mask_bgr, sad_face_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
+
+
 # 把調整好的圖和在臉上
 def face_change(img, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2):
     image_area_no_face = cv.bitwise_not(pic_mask)
@@ -154,20 +170,6 @@ def only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, 
     else:
         pass
     return image
-
-
-'''new'''
-# 每一局贏的人的小特效
-def small_winer_effect():
-
-    pass
-
-
-'''new'''
-# 每一局輸的人的小特效
-def small_loser_effect():
-
-    pass
 
 
 # 讀取相機的function
