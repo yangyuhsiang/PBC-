@@ -195,9 +195,9 @@ class MainInterfacePlayer1(tk.Frame):
         self.scissor = Image.open("scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_fun)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_fun)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=lambda:[self.scissor_pressed(), self.scissor_fun()])
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=lambda:[self.stone_pressed(), self.stone_fun()])
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=lambda:[self.paper_pressed(), self.paper_fun()])
         
         
         # 上方選擇模式欄
@@ -258,22 +258,25 @@ class MainInterfacePlayer1(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
-    def scissor_fun(self):
+    def scissor_pressed(self):
         self.pressed = 1
+    def scissor_fun(self):
         client.send('S'.encode())
         ans = client.recv(2048).decode()
         self.judge_win_or_lose(ans)
 
 
-    def stone_fun(self):
+    def stone_pressed(self):
         self.pressed = 2
+    def stone_fun(self):
         client.send('R'.encode())
         ans = client.recv(2048).decode()
         self.judge_win_or_lose(ans)
         
     
-    def paper_fun(self):
+    def paper_pressed(self):
         self.pressed = 3
+    def papaer_fun(self):
         client.send('P'.encode())
         ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
                                          # 加一個變數，讓show image function 可以加上文字
@@ -360,9 +363,9 @@ class MainInterfacePlayer2(tk.Frame):
         self.scissor = Image.open("scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_fun)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_fun)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_fun)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=lambda:[self.scissor_pressed(), self.scissor_fun()])
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=lambda:[self.stone_pressed(), self.stone_fun()])
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=lambda:[self.paper_pressed(), self.paper_fun()])
         
 
         # 上方接受挑戰欄
@@ -416,25 +419,28 @@ class MainInterfacePlayer2(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
-    def scissor_fun(self):
+    def scissor_pressed(self):
         self.pressed = 1
+    def scissor_fun(self):
         client.send('S'.encode())
         ans = client.recv(2048).decode()
         self.judge_win_or_lose(ans)
 
 
-
-    def stone_fun(self):
+    def stone_pressed(self):
         self.pressed = 2
+    def stone_fun(self):
         client.send('R'.encode())
         ans = client.recv(2048).decode()
         self.judge_win_or_lose(ans)
-
-
-    def paper_fun(self):
+        
+    
+    def paper_pressed(self):
         self.pressed = 3
+    def papaer_fun(self):
         client.send('P'.encode())
-        ans = client.recv(2048).decode()
+        ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
+                                         # 加一個變數，讓show image function 可以加上文字
         self.judge_win_or_lose(ans)
 
 
