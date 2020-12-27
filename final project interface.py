@@ -165,7 +165,8 @@ class MainInterfacePlayer1(tk.Frame):
         self.grid()
         self.createWidgets()
         self.pressed = 0
-        self.small_winer = 0 #　
+        self.small_winer = 0  # 用來判斷有沒有要show出笑臉跟哭臉的function
+        self.small_lose = 0
 
     
     def createWidgets(self):
@@ -319,7 +320,8 @@ class MainInterfacePlayer2(tk.Frame):
         self.recv_info()
         self.createWidgets()
         self.pressed = 0
-
+        self.small_winer = 0
+        self.small_lose = 0
     
     # 接收client1傳送要怎麼玩的邀請
     def recv_info(self):
@@ -434,6 +436,7 @@ class MainInterfacePlayer2(tk.Frame):
     def paper_fun(self):
         self.pressed = 3
         client.send('P'.encode())
+        # 這邊可以加一個time sleep 然後畫面上字幕
         ans = client.recv(2048).decode()
         self.judge_win_or_lose(ans)
 
@@ -483,7 +486,7 @@ msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已�
 if msg_box == 'yes':
     # 先顯示已經連線的視窗
     FORMAT = 'utf-8'
-    SERVER = '140.112.87.31'
+    SERVER = '10.46.246.238'
     PORT = 5050
     ADDR = (SERVER, PORT)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
