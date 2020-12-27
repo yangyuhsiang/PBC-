@@ -2,14 +2,13 @@ import tkinter as tk
 import tkinter.font as tkFont
 import tkinter.messagebox
 from PIL import ImageTk, Image
-from threading import Timer
 import cv2 as cv
 import numpy as np
 import dlib
 import random
 import socket
-import time
-
+from math import hypot
+import select
 
 
 # 按下確認connected後才開始進行
@@ -52,7 +51,7 @@ def what_RPS(stone, paper, scissor, image, w1, h1, pressed,
 
 
 # small_winer的大小調整函數，還有遮罩的函數
-def small_winer_effect(happy, w1, h1):
+def small_winer_effect():
     resize_happy_face = cv.resize(happy, (w1, h1))
     happy_face_mask_bgr = resize_happy_face[:, :, :3]
     happy_face_alpha_ch = resize_happy_face[:, :, 3]
@@ -85,7 +84,7 @@ def face_change(img, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2):
 
 
 # 放在gui上面的照片，會依照你按的鍵去改變臉上的出拳，如果要改變照片就在這個function裡面做變動
-def show_image(image, pressed, small_winer, small_lose, big_winner, big_lose):
+def show_image(image, pressed, small_winer, small_lose):
     image_hight = image.shape[0]
     image_width = image.shape[1]
     image = cv.flip(image, 1)
@@ -121,10 +120,6 @@ def show_image(image, pressed, small_winer, small_lose, big_winner, big_lose):
             image = only_happy_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
         if small_lose == 1:
             image = only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        if big_winner == 1:
-            pass
-        if big_lose == 1:
-            image = big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight)
     return image
 
 
@@ -146,13 +141,6 @@ def only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y
     return image
 
 
-def big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight):
-    image = cv.rectangle(gray_image, (x1-face_width//4, y1-face_hight), (x2+face_width//4, y2+face_hight//6), (0,0,0), 4)
-    return image
-
-
-
-
 # 讀取相機的function
 def video_stream():
     global frame
@@ -160,9 +148,7 @@ def video_stream():
     pressed = main_inter.pressed
     small_winer = main_inter.small_winer
     small_lose = main_inter.small_lose
-    big_winner = main_inter.big_winner
-    big_lose = main_inter.big_lose
-    frame = show_image(image, pressed, small_winer, small_lose, big_winner, big_lose)
+    frame = show_image(image, pressed, small_winer, small_lose)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -181,8 +167,6 @@ class MainInterfacePlayer1(tk.Frame):
         self.pressed = 0
         self.small_winer = 0 #　
         self.small_lose = 0
-        self.big_winner = 0
-        self.big_lose = 0
         
     
     def createWidgets(self):
@@ -229,7 +213,7 @@ class MainInterfacePlayer1(tk.Frame):
         
         
         # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
+        self.btnIns = tk.Button(self, text='遊戲\n說明', height=2, width=4, command=self.instruction, font=f1)
         
         
         # 排版
@@ -272,65 +256,62 @@ class MainInterfacePlayer1(tk.Frame):
 
 
     def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
-        cv.imwrite('game pic.png', frame)
+        tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
     def scissor_pressed(self):
         self.pressed = 1
-        client.send('S'.encode())
     def scissor_fun(self):
-        self.ans = client.recv(2048).decode()
-        self.judge_win_or_lose(self.ans)
+        client.send('S'.encode())
+        ans = client.recv(2048).decode()
+        self.judge_win_or_lose(ans)
 
 
     def stone_pressed(self):
         self.pressed = 2
-        client.send('R'.encode())
     def stone_fun(self):
-        self.ans = client.recv(2048).decode()
-        self.judge_win_or_lose(self.ans)
+        client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        self.judge_win_or_lose(ans)
         
     
     def paper_pressed(self):
         self.pressed = 3
+    def papaer_fun(self):
         client.send('P'.encode())
-    def paper_fun(self):
-        self.ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
+        ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
                                          # 加一個變數，讓show image function 可以加上文字
-        self.judge_win_or_lose(self.ans)
+        self.judge_win_or_lose(ans)
         
     
-    def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
-        self.pressed = 0
-        self.small_winer = 0
-        self.small_lose = 0
-
-
     def judge_win_or_lose(self, ans):
-        if self.ans == 'W':
+        if ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            self.small_lose = 0
+            time.sleep(5)
+            self.small_winer = 0
+            self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
-        elif self.ans == 'L':
+        elif ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            self.small_winer = 0
+            time.sleep(5)
+            self.small_lose = 0
+            self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
-        elif self.ans == 'D':
+        elif ans == 'D':
             self.draw_count += 1
             self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
-        elif self.ans == 'BW':
-            self.win_count += 1
-            self.lblShowWin.configure(text=str(self.win_count))
-            self.big_winner = 1
         else:
-            self.lose_count += 1
-            self.lblShowLose.configure(text=str(self.lose_count))
-            self.big_lose = 1
-            
+            print('recv')
+            self.result_image = frame
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
 
 
 class MainInterfacePlayer2(tk.Frame):
@@ -344,8 +325,6 @@ class MainInterfacePlayer2(tk.Frame):
         self.pressed = 0
         self.small_lose = 0
         self.small_winer = 0
-        self.big_winner = 0
-        self.big_lose = 0
 
     
     # 接收client1傳送要怎麼玩的邀請
@@ -403,7 +382,7 @@ class MainInterfacePlayer2(tk.Frame):
         
         
         # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
+        self.btnIns = tk.Button(self, text='遊戲\n說明', height=2, width=4, command=self.instruction, font=f1)
 
 
         # 排版
@@ -440,64 +419,73 @@ class MainInterfacePlayer2(tk.Frame):
         
         
     def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
-        cv.imwrite('game pic.png', frame)
+        tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
     def scissor_pressed(self):
         self.pressed = 1
-        client.send('S'.encode())
     def scissor_fun(self):
-        self.ans = client.recv(2048).decode()
-        self.judge_win_or_lose(self.ans)
+        client.send('S'.encode())
+        ans = client.recv(2048).decode()
+        self.judge_win_or_lose(ans)
 
 
     def stone_pressed(self):
         self.pressed = 2
-        client.send('R'.encode())
     def stone_fun(self):
-        self.ans = client.recv(2048).decode()
-        self.judge_win_or_lose(self.ans)
+        client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        self.judge_win_or_lose(ans)
         
     
     def paper_pressed(self):
         self.pressed = 3
+    def papaer_fun(self):
         client.send('P'.encode())
-    def paper_fun(self):
-        self.ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
+        ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
                                          # 加一個變數，讓show image function 可以加上文字
-        self.judge_win_or_lose(self.ans)
-
-
-    def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
-        self.pressed = 0
-        self.small_winer = 0
-        self.small_lose = 0
+        self.judge_win_or_lose(ans)
 
 
     def judge_win_or_lose(self, ans):
-        if self.ans == 'W':
+        if ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            self.small_lose = 0
+            time.sleep(5)
+            self.small_winer = 0
+            self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
-        elif self.ans == 'L':
+        elif ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            self.small_winer = 0
+            time.sleep(5)
+            self.small_lose = 0
+            self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
-        elif self.ans == 'D':
+        elif ans == 'D':
             self.draw_count += 1
             self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
-        elif self.ans == 'BW':
-            self.win_count += 1
-            self.lblShowWin.configure(text=str(self.win_count))
-            self.big_winner = 1
         else:
-            self.lose_count += 1
-            self.lblShowLose.configure(text=str(self.lose_count))
-            self.big_lose = 1
+            print('recv')
+            self.result_image = frame
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
+
+
+# 接收照片data然後處理的函數  #可能要刪掉
+def recvall(sock, count):
+    buf = b''
+    while count:
+        newbuf = sock.recv(count)
+        if not newbuf: return None
+        buf += newbuf
+        count -= len(newbuf)
+    return buf
 
 
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
