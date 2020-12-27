@@ -28,18 +28,12 @@ def check_connection():
             conn1.send("bytes").encode()
             conn2.send("bytes").encode()
         except:
-            PORT = 5050
-            SERVER = socket.gethostbyname(socket.gethostname())
-            ADDR = (SERVER, PORT)
-            server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            server.bind(ADDR)
             start()
-
+            check_connection()
 
 '''
 Connection initiated
 '''
-
 HEADER = 64
 PORT = 5050
 SERVER = socket.gethostbyname(socket.gethostname())
@@ -48,12 +42,10 @@ FORMAT = 'utf-8'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 start()
-
-# connectionChecker=threading.Thread(target = check_connection)
-# connectionChecker.start()
+connectionChecker=threading.Thread(target = check_connection)
+connectionChecker.start()
 
 # Game mode selection. 0 for bo3, 1 for bo5, 2 for bo7.
-# conn1.send("Please select game mode.".encode())
 while True:
     gameMode = conn1.recv(2048).decode(FORMAT)
     modeString = ''
@@ -158,26 +150,6 @@ while True:
             conn1.send('L'.encode())
             conn2.send('W'.encode())
             continue
-# Potential lines to send pictures across clients
-# print(decimg1)
-# print(decimg2)
-# decimg1 = cv.cvtColor(decimg1, cv.COLOR_BGR2RGB)
-# decimg2 = cv.cvtColor(decimg1, cv.COLOR_BGR2RGB)
-# img1 = Image.fromarray(decimg1)
-# img2 = Image.fromarray(decimg2)
-# img1rgb = img1.convert('RGB')
-# img2rgb = img2.convert('RGB')
-# cv.imshow('er', combine_image(img1rgb, img2rgb))
-# key1 = cv.waitKey(1)
-
-# while True:
-#     result, imgencode = cv.imencode('.jpg', combine_image(img1rgb, img2rgb))
-#     data = np.array(imgencode)
-#     stringData = data.tobytes()
-#     conn1.send(str(len(stringData)).ljust(16).encode())
-#     conn1.send(stringData)
-#     conn2.send(str(len(stringData)).ljust(16).encode())
-#     conn2.send(stringData)
 
 print('Over')
 
