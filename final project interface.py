@@ -21,39 +21,36 @@ capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
 
+# 剪刀石頭布的大小調整然後還有遮罩，把隨機出拳，按下鍵後固定出拳整合在一起
+def what_RPS(stone, paper, scissor, image, w1, h1, pressed,
+                      image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2):
+    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+        if pressed == 0:
+            type = random.randrange(0, 3)
+            if type == 0:
+                resize_image = cv.resize(stone, (w1, h1))
+            elif type == 1:
+                resize_image = cv.resize(paper, (w1, h1))
+            elif type == 2:
+                resize_image = cv.resize(scissor, (w1, h1))
+        elif pressed == 1:  # scissor
+            resize_image = cv.resize(scissor, (w1, h1))
+        elif pressed == 2:  # rock
+            resize_image = cv.resize(stone, (w1, h1))
+        elif pressed == 3:  # paper
+            resize_image = cv.resize(paper, (w1, h1))
+        image_mask_bgr = resize_image[:, :, :3]
+        image_alpha_ch = resize_image[:, :, 3]
+        _, pic_mask = cv.threshold(image_alpha_ch, 220, 225, cv.THRESH_BINARY)
+        pic_part = cv.bitwise_and(image_mask_bgr, image_mask_bgr, mask = pic_mask)
 
-# stone 的大小調整，還有遮罩的函數
-def stone_change(stone, w1, h1):
-    resize_stone = cv.resize(stone, (w1, h1))
-    stone_mask_bgr = resize_stone[:, :, :3]
-    stone_alpha_ch = resize_stone[:, :, 3]
-    _, pic_mask = cv.threshold(stone_alpha_ch, 220, 255, cv.THRESH_BINARY)
-    pic_part = cv.bitwise_and(stone_mask_bgr, stone_mask_bgr, mask=pic_mask)
-    return pic_mask, pic_part
-
-
-# paper的大小調整函數，還有遮罩的函數
-def paper_change(paper, w1, h1):
-    resize_paper = cv.resize(paper, (w1, h1))
-    paper_mask_bgr = resize_paper[:, :, :3]
-    paper_alpha_ch = resize_paper[:, :, 3]
-    _, pic_mask = cv.threshold(paper_alpha_ch, 220, 255, cv.THRESH_BINARY)
-    pic_part = cv.bitwise_and(paper_mask_bgr, paper_mask_bgr, mask=pic_mask)
-    return pic_mask, pic_part
-
-
-# 剪刀的大小調整函數，還有遮罩的函數
-def scissor_change(scissor, w1, h1):
-    resize_scissor = cv.resize(scissor, (w1, h1))
-    scissor_mask_bgr = resize_scissor[:, :, :3]
-    scissor_alpha_ch = resize_scissor[:, :, 3]
-    _, pic_mask = cv.threshold(scissor_alpha_ch, 220, 255, cv.THRESH_BINARY)
-    pic_part = cv.bitwise_and(scissor_mask_bgr, scissor_mask_bgr, mask=pic_mask)
-    return pic_mask, pic_part
+        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+    else:
+        pass
+    return image
 
 
-'''new'''
-# 每一局贏的人的小特效
+# small_winer的大小調整函數，還有遮罩的函數
 def small_winer_effect():
     resize_happy_face = cv.resize(happy, (w1, h1))
     happy_face_mask_bgr = resize_happy_face[:, :, :3]
@@ -87,7 +84,7 @@ def face_change(img, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2):
 
 
 # 放在gui上面的照片，會依照你按的鍵去改變臉上的出拳，如果要改變照片就在這個function裡面做變動
-def show_image(image, pressed):
+def show_image(image, pressed, small_winer, small_lose):
     image_hight = image.shape[0]
     image_width = image.shape[1]
     image = cv.flip(image, 1)
@@ -117,69 +114,12 @@ def show_image(image, pressed):
         pic_x1 = x1+pic_width2
         pic_x2 = x1+pic_width1+pic_width2
         '''下面的function 傳入前就先加文字上去'''
-        if main_inter.pressed == 0:  # random
-            image = paper_scissor_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        elif main_inter.pressed == 1:  # scissor
-            image = only_scissor(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        elif main_inter.pressed == 2:  # rock
-            image = only_paper(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        elif main_inter.pressed == 3  # paper
-            image = only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        if main_inter.small_winer == 1:
+        image = what_RPS(stone, paper, scissor, image, pic_width1, pic_hight1, pressed,
+                                image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2)
+        if small_winer == 1:
             image = only_happy_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        if main_inter.small_lose == 1:
+        if small_lose == 1:
             image = only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-    return image
-
-
-# 剪刀石頭布的function
-def paper_scissor_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
-    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
-        type = random.randrange(0, 3)  # 三個函數隨機變動，所以剪刀石頭布可以隨機換
-        if type == 0:
-            pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
-
-        elif type == 1:
-            pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
-
-        elif type == 2:
-            pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
-
-        # 額頭要放上剪刀石頭布的位置的處理
-        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
-    else:  # 要放的圖超出範圍的時候
-        pass
-    # 最後要show出的image的處理，然後show出
-    return image
-
-
-# 只有剪刀的function
-def only_scissor(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
-    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
-        pic_mask, pic_part = scissor_change(scissor, pic_width1, pic_hight1)
-        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
-    else:
-        pass
-    return image
-
-
-# 只有布的funtion
-def only_paper(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
-    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
-        pic_mask, pic_part = paper_change(paper, pic_width1, pic_hight1)
-        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
-    else:
-        pass
-    return image
-
-
-# 只有石頭的function
-def only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
-    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
-        pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
-        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
-    else:
-        pass
     return image
 
 
@@ -206,7 +146,9 @@ def video_stream():
     global frame
     ret, image = capture.read()
     pressed = main_inter.pressed
-    frame = show_image(image, pressed)
+    small_winer = main_inter.small_winer
+    small_lose = main_inter.small_lose
+    frame = show_image(image, pressed, small_winer, small_lose)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
