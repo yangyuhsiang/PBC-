@@ -156,6 +156,20 @@ def only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, 
     return image
 
 
+'''new'''
+# 每一局贏的人的小特效
+def small_winer_effect():
+
+    pass
+
+
+'''new'''
+# 每一局輸的人的小特效
+def small_loser_effect():
+
+    pass
+
+
 # 讀取相機的function
 def video_stream():
     global frame
@@ -178,6 +192,7 @@ class MainInterfacePlayer1(tk.Frame):
         self.grid()
         self.createWidgets()
         self.pressed = 0
+        self.small_winer = 0 #　
 
     
     def createWidgets(self):
@@ -287,32 +302,37 @@ class MainInterfacePlayer1(tk.Frame):
     def paper_fun(self):
         self.pressed = 3
         client.send('P'.encode())
-        ans = client.recv(2048).decode()
+        ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
+                                         # 加一個變數，讓show image function 可以加上文字
         self.judge_win_or_lose(ans)
         
     
     def judge_win_or_lose(self, ans):
-    if ans == 'W':
-        self.win_count += 1
-        self.pressed = 0
-        self.lblShowWin.configure(text=str(self.win_count))
-    elif ans == 'L':
-        self.lose_count += 1
-        self.pressed = 0
-        self.lblShowLose.configure(text=str(self.lose_count))
-    elif ans == 'D':
-        self.draw_count += 1
-        self.pressed = 0
-        self.lblShowDraw.configure(text=str(self.draw_count))
-    else:
-        print('recv')
-        self.result_image = frame
-        while True:
-            result, imgencode = cv.imencode('.jpg', self.result_image)
-            data = np.array(imgencode)
-            stringData = data.tobytes()
-            client.send( str(len(stringData)).ljust(16).encode())
-            client.send(stringData)
+        if ans == 'W':
+            self.win_count += 1
+            # 這邊應該要對照片加上輸贏的特效
+            # 加上一個變數，讓外面的show image function 可以去判斷你是輸是贏
+            
+            # 再加一個time.sleep(5) ，有輸贏的特效5秒，然後就回到原本的隨便跳來跳去。
+            self.pressed = 0
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.pressed = 0
+            self.lblShowLose.configure(text=str(self.lose_count))
+        elif ans == 'D':
+            self.draw_count += 1
+            self.pressed = 0
+            self.lblShowDraw.configure(text=str(self.draw_count))
+        else:
+            print('recv')
+            self.result_image = frame
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
 
 
 class MainInterfacePlayer2(tk.Frame):
