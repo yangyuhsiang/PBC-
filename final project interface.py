@@ -166,7 +166,8 @@ class MainInterfacePlayer1(tk.Frame):
         self.createWidgets()
         self.pressed = 0
         self.small_winer = 0 #　
-
+        self.small_lose = 0
+        
     
     def createWidgets(self):
         f1 = tkFont.Font(size=16, family='Microsoft JhengHei')
@@ -233,7 +234,7 @@ class MainInterfacePlayer1(tk.Frame):
         self.btnIns.grid(row=0, rowspan=2, column=6)
         
         self.btnScissor.grid(row=7, column=0)
-        self.btnStone.grid(row=7, column=2)
+        self.btnStone.grid(row=7, column=2, sticky=tk.W)
         self.btnPaper.grid(row=7, column=4)
     
     
@@ -322,6 +323,8 @@ class MainInterfacePlayer2(tk.Frame):
         self.recv_info()
         self.createWidgets()
         self.pressed = 0
+        self.small_lose = 0
+        self.small_winer = 0
 
     
     # 接收client1傳送要怎麼玩的邀請
@@ -401,7 +404,7 @@ class MainInterfacePlayer2(tk.Frame):
         self.btnIns.grid(row=0, rowspan=2, column=6)
  
         self.btnScissor.grid(row=7, column=0)
-        self.btnStone.grid(row=7, column=2)
+        self.btnStone.grid(row=7, column=2, sticky=tk.W)
         self.btnPaper.grid(row=7, column=4)
 
 
@@ -489,7 +492,7 @@ msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已�
 if msg_box == 'yes':
     # 先顯示已經連線的視窗
     FORMAT = 'utf-8'
-    SERVER = '140.112.87.31'
+    SERVER = '10.46.246.238'
     PORT = 5050
     ADDR = (SERVER, PORT)
     client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
