@@ -1,20 +1,15 @@
-import tkinter as tk
-import tkinter.font as tkFont
-import tkinter.messagebox
-from PIL import ImageTk, Image
 import cv2 as cv
 import numpy as np
 import dlib
-import random
-import socket
 from math import hypot
-import select
+import time
 
 
 # 按下確認connected後才開始進行
 stone = cv.imread("rock.png", cv.IMREAD_UNCHANGED)
 paper = cv.imread("paper.png", cv.IMREAD_UNCHANGED)
 scissor = cv.imread("scissor.png", cv.IMREAD_UNCHANGED)
+sad_face = cv.imread("small_lose.png", cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -47,6 +42,22 @@ def scissor_change(scissor, w1, h1):
     scissor_alpha_ch = resize_scissor[:, :, 3]
     _, pic_mask = cv.threshold(scissor_alpha_ch, 220, 255, cv.THRESH_BINARY)
     pic_part = cv.bitwise_and(scissor_mask_bgr, scissor_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
+
+
+'''new'''
+# 每一局贏的人的小特效
+def small_winer_effect():
+    pass
+
+
+# small_lose的大小調整函數，還有遮罩的函數
+def small_loser_effect(sad_face ,w1, h1):
+    resize_sad_face = cv.resize(sad_face, (w1, h1))
+    sad_face_mask_bgr = resize_sad_face[:, :, :3]
+    sad_face_alpha_ch = resize_sad_face[:, :, 3]
+    _, pic_mask = cv.threshold(sad_face_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(sad_face_mask_bgr, sad_face_mask_bgr, mask=pic_mask)
     return pic_mask, pic_part
 
 
@@ -105,7 +116,7 @@ def show_image(image, pressed):
     return image
 
 
-# 剪刀石頭布的function
+# random剪刀石頭布的function
 def paper_scissor_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
     if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
         type = random.randrange(0, 3)  # 三個函數隨機變動，所以剪刀石頭布可以隨機換
@@ -156,20 +167,6 @@ def only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, 
     return image
 
 
-'''new'''
-# 每一局贏的人的小特效
-def small_winer_effect():
-
-    pass
-
-
-'''new'''
-# 每一局輸的人的小特效
-def small_loser_effect():
-
-    pass
-
-
 # 讀取相機的function
 def video_stream():
     global frame
@@ -192,7 +189,6 @@ class MainInterfacePlayer1(tk.Frame):
         self.grid()
         self.createWidgets()
         self.pressed = 0
-        self.small_winer = 0 #　
 
     
     def createWidgets(self):
@@ -285,35 +281,18 @@ class MainInterfacePlayer1(tk.Frame):
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
 
 
+    # pressed = 1 是按完之後才會回傳出來
     def scissor_fun(self):
         self.pressed = 1
         client.send('S'.encode())
-        ans = client.recv(2048).decode()
-        self.judge_win_or_lose(ans)
-
-
-    def stone_fun(self):
-        self.pressed = 2
-        client.send('R'.encode())
-        ans = client.recv(2048).decode()
-        self.judge_win_or_lose(ans)
-        
-    
-    def paper_fun(self):
-        self.pressed = 3
-        client.send('P'.encode())
-        ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
-                                         # 加一個變數，讓show image function 可以加上文字
-        self.judge_win_or_lose(ans)
-        
-    
-    def judge_win_or_lose(self, ans):
+        ans = client.recv(2048).decode()  # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
+                                          # 加一個變數，讓show image function 可以加上文字
         if ans == 'W':
             self.win_count += 1
             # 這邊應該要對照片加上輸贏的特效
             # 加上一個變數，讓外面的show image function 可以去判斷你是輸是贏
-            
             # 再加一個time.sleep(5) ，有輸贏的特效5秒，然後就回到原本的隨便跳來跳去。
+
             self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
@@ -333,6 +312,81 @@ class MainInterfacePlayer1(tk.Frame):
                 stringData = data.tobytes()
                 client.send( str(len(stringData)).ljust(16).encode())
                 client.send(stringData)
+
+
+    def stone_fun(self):
+        self.pressed = 2
+        client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.pressed = 0
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.pressed = 0
+            self.lblShowLose.configure(text=str(self.lose_count))
+        elif ans == 'D':
+            self.draw_count += 1
+            self.pressed = 0
+            self.lblShowDraw.configure(text=str(self.draw_count))
+        else:
+            print('recv')
+            self.result_image = frame
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
+        
+    
+    def paper_fun(self):
+        self.pressed = 3
+        client.send('P'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.pressed = 0
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.pressed = 0
+            self.lblShowLose.configure(text=str(self.lose_count))
+        elif ans == 'D':
+            self.draw_count += 1
+            self.pressed = 0
+            self.lblShowDraw.configure(text=str(self.draw_count))
+        else:
+            self.imgFile = open('moonsave.png', 'w')  # 開始寫入圖片檔
+            self.imgData = frame  # 接收遠端主機傳來的數據
+            self.imgFile.write(self.imgData)
+            self.imgFile.close()
+            print('start send image')
+            self.imgFile = open("moon.png", "rb")
+
+            while True:
+                self.imgData = self.imgFile.readline(512)
+                if not self.imgData:
+                    break  # 讀完檔案結束迴圈
+                client.send(self.imgData)
+            self.imgFile.close()
+            print('transmit end')
+
+            # 接收來自server的照片
+            socks = [client]
+            while True:
+                readySocks, _, _ = select.select(socks, [], [], 5)
+                for sock1 in readySocks:
+                    length_client = recvall(sock1, 16)
+                    stringData_client = recvall(sock1, int(length_client))
+                    data_client = np.frombuffer(stringData_client, dtype='uint8')
+                    decimg_client = cv.imdecode(data_client, 1)
+                    cv.imshow('SERVER', decimg_client)
+                    key = cv.waitKey(1)
+                    if key == ord('q'):
+                        cv.destroyAllWindows()
+                        break
 
 
 class MainInterfacePlayer2(tk.Frame):
@@ -431,11 +485,11 @@ class MainInterfacePlayer2(tk.Frame):
         client.send('Y'.encode())
 
 
+
     def no(self):
         client.send('N'.encode())
         self.recv_info()
         self.createWidgets()
-        
         
     def instruction(self):  # 這裡放出拳的說明
         tkinter.messagebox.showinfo(title='遊戲說明', message='如果你希望出剪刀：剪刀剪刀剪刀\n如果你希望出石頭：石頭石頭石頭\n如果你希望出布：布布布')
@@ -445,25 +499,6 @@ class MainInterfacePlayer2(tk.Frame):
         self.pressed = 1
         client.send('S'.encode())
         ans = client.recv(2048).decode()
-        self.judge_win_or_lose(ans)
-
-
-
-    def stone_fun(self):
-        self.pressed = 2
-        client.send('R'.encode())
-        ans = client.recv(2048).decode()
-        self.judge_win_or_lose(ans)
-
-
-    def paper_fun(self):
-        self.pressed = 3
-        client.send('P'.encode())
-        ans = client.recv(2048).decode()
-        self.judge_win_or_lose(ans)
-
-
-    def judge_win_or_lose(self, ans):
         if ans == 'W':
             self.win_count += 1
             self.pressed = 0
@@ -477,8 +512,7 @@ class MainInterfacePlayer2(tk.Frame):
             self.pressed = 0
             self.lblShowDraw.configure(text=str(self.draw_count))
         else:
-            print('recv')
-            self.result_image = frame
+            self.result_image = imgtk
             while True:
                 result, imgencode = cv.imencode('.jpg', self.result_image)
                 data = np.array(imgencode)
@@ -487,7 +521,60 @@ class MainInterfacePlayer2(tk.Frame):
                 client.send(stringData)
 
 
-# 接收照片data然後處理的函數  #可能要刪掉
+
+    def stone_fun(self):
+        self.pressed = 2
+        client.send('R'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.pressed = 0
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.pressed = 0
+            self.lblShowLose.configure(text=str(self.lose_count))
+        elif ans == 'D':
+            self.draw_count += 1
+            self.pressed = 0
+            self.lblShowDraw.configure(text=str(self.draw_count))
+        else:
+            self.result_image = imgtk
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
+
+
+    def paper_fun(self):
+        self.pressed = 3
+        client.send('P'.encode())
+        ans = client.recv(2048).decode()
+        if ans == 'W':
+            self.win_count += 1
+            self.pressed = 0
+            self.lblShowWin.configure(text=str(self.win_count))
+        elif ans == 'L':
+            self.lose_count += 1
+            self.pressed = 0
+            self.lblShowLose.configure(text=str(self.lose_count))
+        elif ans == 'D':
+            self.draw_count += 1
+            self.pressed = 0
+            self.lblShowDraw.configure(text=str(self.draw_count))
+        else:
+            self.result_image = imgtk
+            while True:
+                result, imgencode = cv.imencode('.jpg', self.result_image)
+                data = np.array(imgencode)
+                stringData = data.tobytes()
+                client.send( str(len(stringData)).ljust(16).encode())
+                client.send(stringData)
+
+
+# 接收照片data然後處理的函數
 def recvall(sock, count):
     buf = b''
     while count:
