@@ -53,7 +53,12 @@ def scissor_change(scissor, w1, h1):
 '''new'''
 # 每一局贏的人的小特效
 def small_winer_effect():
-    pass
+    resize_happy_face = cv.resize(happy, (w1, h1))
+    happy_face_mask_bgr = resize_happy[:, :, :3]
+    happy_face_alpha_ch = resize_happy[:, :, 3]
+    _, pic_mask = cv.threshold(happy_face_alpha_ch, 220, 255, cv.THRESH_BINARY)
+    pic_part = cv.bitwise_and(happy_face_mask_bgr, happy_face_mask_bgr, mask=pic_mask)
+    return pic_mask, pic_part
 
 
 # small_lose的大小調整函數，還有遮罩的函數
