@@ -469,17 +469,6 @@ class MainInterfacePlayer2(tk.Frame):
             self.big_lose = 1
 
 
-# 接收照片data然後處理的函數  #可能要刪掉
-def recvall(sock, count):
-    buf = b''
-    while count:
-        newbuf = sock.recv(count)
-        if not newbuf: return None
-        buf += newbuf
-        count -= len(newbuf)
-    return buf
-
-
 msg_box = tkinter.messagebox.askquestion(title='連線狀態', message='您已連線成功，是否進入遊戲？')
 if msg_box == 'yes':
     # 先顯示已經連線的視窗
