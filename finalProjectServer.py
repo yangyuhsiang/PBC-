@@ -37,15 +37,7 @@ def check_connection():
 
 
 connectionChecker = threading.Thread(target=check_connection)
-# connectionChecker.start()
-# def rec1():
-#     ans1 = conn1.recv(2048).decode(FORMAT)
-#     return ans1
-# def rec2():
-#     ans2 = conn2.recv(2048).decode(FORMAT)
-#     return ans2
-# getAns1 = threading.Thread(target=rec1)
-# getAns2 = threading.Thread(target=rec2)
+
 '''
 Connection initiated
 '''
