@@ -2,12 +2,14 @@ import tkinter as tk
 import tkinter.font as tkFont
 import tkinter.messagebox
 from PIL import ImageTk, Image
+from threading import Timer
 import cv2 as cv
 import numpy as np
 import dlib
 import random
 import socket
 import time
+
 
 
 # 按下確認connected後才開始進行
@@ -83,7 +85,7 @@ def face_change(img, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2):
 
 
 # 放在gui上面的照片，會依照你按的鍵去改變臉上的出拳，如果要改變照片就在這個function裡面做變動
-def show_image(image, pressed, small_winer, small_lose):
+def show_image(image, pressed, small_winer, small_lose, big_winner, big_lose):
     image_hight = image.shape[0]
     image_width = image.shape[1]
     image = cv.flip(image, 1)
@@ -144,8 +146,8 @@ def only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y
     return image
 
 
-def big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight)
-    image = cv.rectangle(gray_image, (x1-face_width//4, y1-face_hight//6), (x2+face_width//4, y2+face_hight//6), thickness=4)
+def big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight):
+    image = cv.rectangle(gray_image, (x1-face_width//4, y1-face_hight//4), (x2+face_width//4, y2+face_hight//6), (0,0,0), 4)
     return image
 
 
@@ -158,7 +160,9 @@ def video_stream():
     pressed = main_inter.pressed
     small_winer = main_inter.small_winer
     small_lose = main_inter.small_lose
-    frame = show_image(image, pressed, small_winer, small_lose)
+    big_winner = main_inter.big_winner
+    big_lose = main_inter.big_lose
+    frame = show_image(image, pressed, small_winer, small_lose, big_winner, big_lose)
     cv2image = cv.cvtColor(frame, cv.COLOR_BGR2RGBA)
     img = Image.fromarray(cv2image)
     imgtk = ImageTk.PhotoImage(image=img)
@@ -177,6 +181,8 @@ class MainInterfacePlayer1(tk.Frame):
         self.pressed = 0
         self.small_winer = 0 #　
         self.small_lose = 0
+        self.big_winner = 0
+        self.big_lose = 0
         
     
     def createWidgets(self):
@@ -206,9 +212,9 @@ class MainInterfacePlayer1(tk.Frame):
         self.scissor = Image.open("scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_pressed)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_pressed)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_pressed)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=lambda:[self.scissor_pressed(), self.scissor_fun()])
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=lambda:[self.stone_pressed(), self.stone_fun()])
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=lambda:[self.paper_pressed(), self.paper_fun()])
         
         
         # 上方選擇模式欄
@@ -272,6 +278,7 @@ class MainInterfacePlayer1(tk.Frame):
     def scissor_pressed(self):
         self.pressed = 1
         client.send('S'.encode())
+    def scissor_fun(self):
         self.ans = client.recv(2048).decode()
         self.judge_win_or_lose(self.ans)
 
@@ -279,6 +286,7 @@ class MainInterfacePlayer1(tk.Frame):
     def stone_pressed(self):
         self.pressed = 2
         client.send('R'.encode())
+    def stone_fun(self):
         self.ans = client.recv(2048).decode()
         self.judge_win_or_lose(self.ans)
         
@@ -286,6 +294,7 @@ class MainInterfacePlayer1(tk.Frame):
     def paper_pressed(self):
         self.pressed = 3
         client.send('P'.encode())
+    def paper_fun(self):
         self.ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
                                          # 加一個變數，讓show image function 可以加上文字
         self.judge_win_or_lose(self.ans)
@@ -293,18 +302,20 @@ class MainInterfacePlayer1(tk.Frame):
     
     def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
         self.pressed = 0
+        self.small_winer = 0
+        self.small_lose = 0
 
 
     def judge_win_or_lose(self, ans):
         if self.ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            t = Timer(5.0, self.pressed_paeameter()).strat()
+            t = Timer(5.0, self.pressed_paeameter()).start()
             self.lblShowWin.configure(text=str(self.win_count))
         elif self.ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            t = Timer(5.0, self.pressed_paeameter()).strat()
+            t = Timer(5.0, self.pressed_paeameter()).start()
             self.lblShowLose.configure(text=str(self.lose_count))
         elif self.ans == 'D':
             self.draw_count += 1
@@ -332,6 +343,8 @@ class MainInterfacePlayer2(tk.Frame):
         self.pressed = 0
         self.small_lose = 0
         self.small_winer = 0
+        self.big_winner = 0
+        self.big_lose = 0
 
     
     # 接收client1傳送要怎麼玩的邀請
@@ -373,9 +386,9 @@ class MainInterfacePlayer2(tk.Frame):
         self.scissor = Image.open("scissor.png")
         self.scissor = self.scissor.resize((50, 50), Image.ANTIALIAS)
         self.scissor_tk = ImageTk.PhotoImage(self.scissor)
-        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=self.scissor_pressed)
-        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=self.stone_pressed)
-        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=self.paper_pressed)
+        self.btnScissor = tk.Button(self, height=50, width=50, image=self.scissor_tk, command=lambda:[self.scissor_pressed(), self.scissor_fun()])
+        self.btnStone = tk.Button(self, height=50, width=50, image=self.stone_tk, command=lambda:[self.stone_pressed(), self.stone_fun()])
+        self.btnPaper = tk.Button(self, height=50, width=50, image=self.paper_tk, command=lambda:[self.paper_pressed(), self.paper_fun()])
         
 
         # 上方接受挑戰欄
@@ -432,6 +445,7 @@ class MainInterfacePlayer2(tk.Frame):
     def scissor_pressed(self):
         self.pressed = 1
         client.send('S'.encode())
+    def scissor_fun(self):
         self.ans = client.recv(2048).decode()
         self.judge_win_or_lose(self.ans)
 
@@ -439,6 +453,7 @@ class MainInterfacePlayer2(tk.Frame):
     def stone_pressed(self):
         self.pressed = 2
         client.send('R'.encode())
+    def stone_fun(self):
         self.ans = client.recv(2048).decode()
         self.judge_win_or_lose(self.ans)
         
@@ -446,6 +461,7 @@ class MainInterfacePlayer2(tk.Frame):
     def paper_pressed(self):
         self.pressed = 3
         client.send('P'.encode())
+    def paper_fun(self):
         self.ans = client.recv(2048).decode() # 加一個try except 如果沒有收到就跑等待收取照片(opencv放文字)
                                          # 加一個變數，讓show image function 可以加上文字
         self.judge_win_or_lose(self.ans)
@@ -453,18 +469,20 @@ class MainInterfacePlayer2(tk.Frame):
 
     def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
         self.pressed = 0
+        self.small_winer = 0
+        self.small_lose = 0
 
 
     def judge_win_or_lose(self, ans):
         if self.ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            t = Timer(5.0, self.pressed_paeameter()).strat()
+            t = Timer(5.0, self.pressed_paeameter()).start()
             self.lblShowWin.configure(text=str(self.win_count))
         elif self.ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            t = Timer(5.0, self.pressed_paeameter()).strat()
+            t = Timer(5.0, self.pressed_paeameter()).start()
             self.lblShowLose.configure(text=str(self.lose_count))
         elif self.ans == 'D':
             self.draw_count += 1
