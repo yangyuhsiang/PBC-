@@ -15,6 +15,8 @@ import select
 stone = cv.imread("rock.png", cv.IMREAD_UNCHANGED)
 paper = cv.imread("paper.png", cv.IMREAD_UNCHANGED)
 scissor = cv.imread("scissor.png", cv.IMREAD_UNCHANGED)
+happy = cv.imread('happy.png', cv.IMREAD_UNCHANGED)
+sad = cv.imread('small_lose.png', cv.IMREAD_UNCHANGED)
 capture = cv.VideoCapture(0, cv.CAP_DSHOW)
 detector = dlib.get_frontal_face_detector()
 
@@ -54,8 +56,8 @@ def scissor_change(scissor, w1, h1):
 # 每一局贏的人的小特效
 def small_winer_effect():
     resize_happy_face = cv.resize(happy, (w1, h1))
-    happy_face_mask_bgr = resize_happy[:, :, :3]
-    happy_face_alpha_ch = resize_happy[:, :, 3]
+    happy_face_mask_bgr = resize_happy_face[:, :, :3]
+    happy_face_alpha_ch = resize_happy_face[:, :, 3]
     _, pic_mask = cv.threshold(happy_face_alpha_ch, 220, 255, cv.THRESH_BINARY)
     pic_part = cv.bitwise_and(happy_face_mask_bgr, happy_face_mask_bgr, mask=pic_mask)
     return pic_mask, pic_part
@@ -121,8 +123,12 @@ def show_image(image, pressed):
             image = only_scissor(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
         elif main_inter.pressed == 2:  # rock
             image = only_paper(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
-        else:  # paper
+        elif main_inter.pressed == 3  # paper
             image = only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
+        if main_inter.small_winer == 1:
+            image = only_happy_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
+        if main_inter.small_lose == 1:
+            image = only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
     return image
 
 
@@ -171,6 +177,24 @@ def only_paper(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, 
 def only_stone(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
     if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
         pic_mask, pic_part = stone_change(stone, pic_width1, pic_hight1)
+        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+    else:
+        pass
+    return image
+
+
+def only_happy_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
+    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+        pic_mask, pic_part = small_winer_effect(happy, pic_width1, pic_hight1)
+        image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
+    else:
+        pass
+    return image
+
+
+def only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1):
+    if pic_y2 <= image_width and pic_x2 <= image_hight and pic_x1 >= 0 and pic_y1 >= 0:  # 沒有超出範圍
+        pic_mask, pic_part = small_loser_effect(sad, pic_width1, pic_hight1)
         image = face_change(image, pic_mask, pic_part, pic_y1, pic_y2, pic_x1, pic_x2)
     else:
         pass
@@ -317,14 +341,16 @@ class MainInterfacePlayer1(tk.Frame):
     def judge_win_or_lose(self, ans):
         if ans == 'W':
             self.win_count += 1
-            # 這邊應該要對照片加上輸贏的特效
-            # 加上一個變數，讓外面的show image function 可以去判斷你是輸是贏
-            
-            # 再加一個time.sleep(5) ，有輸贏的特效5秒，然後就回到原本的隨便跳來跳去。
+            self.small_winer = 1
+            time.sleep(5)
+            self.small_winer = 0
             self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
             self.lose_count += 1
+            self.small_lose = 1
+            time.sleep(5)
+            self.small_lose = 0
             self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
         elif ans == 'D':
@@ -473,10 +499,16 @@ class MainInterfacePlayer2(tk.Frame):
     def judge_win_or_lose(self, ans):
         if ans == 'W':
             self.win_count += 1
+            self.small_winer = 1
+            time.sleep(5)
+            self.small_winer = 0
             self.pressed = 0
             self.lblShowWin.configure(text=str(self.win_count))
         elif ans == 'L':
             self.lose_count += 1
+            self.small_lose = 1
+            time.sleep(5)
+            self.small_lose = 0
             self.pressed = 0
             self.lblShowLose.configure(text=str(self.lose_count))
         elif ans == 'D':
