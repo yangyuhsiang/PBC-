@@ -119,6 +119,10 @@ def show_image(image, pressed, small_winer, small_lose):
             image = only_happy_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
         if small_lose == 1:
             image = only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y2, pic_width1, pic_hight1)
+        if big_winner == 1:
+            pass
+        if big_lose == 1:
+            image = big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight)
     return image
 
 
@@ -138,6 +142,13 @@ def only_sad_face(image, image_width, image_hight, pic_x1, pic_x2, pic_y1, pic_y
     else:
         pass
     return image
+
+
+def big_lose_effect(gray_image, x1, y1, x2, y2, face_width, face_hight)
+    image = cv.rectangle(gray_image, (x1-face_width//4, y1-face_hight//6), (x2+face_width//4, y2+face_hight//6), thickness=4)
+    return image
+
+
 
 
 # 讀取相機的function
@@ -280,20 +291,20 @@ class MainInterfacePlayer1(tk.Frame):
         self.judge_win_or_lose(self.ans)
         
     
+    def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
+        self.pressed = 0
+
+
     def judge_win_or_lose(self, ans):
         if self.ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            #time.sleep(5)
-            #self.small_winer = 0
-            self.pressed = 0
+            t = Timer(5.0, self.pressed_paeameter()).strat()
             self.lblShowWin.configure(text=str(self.win_count))
         elif self.ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            #time.sleep(5)
-            #self.small_lose =0
-            self.pressed = 0
+            t = Timer(5.0, self.pressed_paeameter()).strat()
             self.lblShowLose.configure(text=str(self.lose_count))
         elif self.ans == 'D':
             self.draw_count += 1
@@ -440,20 +451,20 @@ class MainInterfacePlayer2(tk.Frame):
         self.judge_win_or_lose(self.ans)
 
 
+    def pressed_paeameter(self):  # 用來操控定時的變數，因為要用function格式，所以才另外打
+        self.pressed = 0
+
+
     def judge_win_or_lose(self, ans):
         if self.ans == 'W':
             self.win_count += 1
             self.small_winer = 1
-            #time.sleep(5)
-            #self.small_winer = 0
-            self.pressed = 0
+            t = Timer(5.0, self.pressed_paeameter()).strat()
             self.lblShowWin.configure(text=str(self.win_count))
         elif self.ans == 'L':
             self.lose_count += 1
             self.small_lose = 1
-            #time.sleep(5)
-            #self.small_lose =0
-            self.pressed = 0
+            t = Timer(5.0, self.pressed_paeameter()).strat()
             self.lblShowLose.configure(text=str(self.lose_count))
         elif self.ans == 'D':
             self.draw_count += 1
