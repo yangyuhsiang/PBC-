@@ -1,5 +1,4 @@
 import socket
-import cv2 as cv
 
 def start():
     global conn1
