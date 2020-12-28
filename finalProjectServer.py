@@ -29,7 +29,7 @@ def check_connection():
             conn2.send("bytes").encode()
         except:
             start()
-            check_connection()
+            connectionChecker.start()
 
 '''
 Connection initiated
