@@ -244,8 +244,8 @@ class MainInterfacePlayer1(tk.Frame):
         self.btnSend = tk.Button(self, text='確認', height=1, width=4, command=self.send_request, font=f1)
         
         
-        # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
+        # 拍照按鈕
+        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.camera, font=f1)
         
         
         # 排版
@@ -287,9 +287,9 @@ class MainInterfacePlayer1(tk.Frame):
             self.createWidgets()
 
 
-    def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
+    def camera(self):  # 拍照的函數
         cv.imwrite('game pic.png', frame)
+        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
 
 
     def scissor_pressed(self):
@@ -418,8 +418,8 @@ class MainInterfacePlayer2(tk.Frame):
         self.btnN = tk.Button(self, text='否', height=1, width=4, command=self.no, font=f1)
         
         
-        # 遊戲說明按鈕,點一下會跳出出拳說明
-        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.instruction, font=f1)
+        # 拍照按鈕
+        self.btnIns = tk.Button(self, text='記憶\n永存', height=2, width=4, command=self.camera, font=f1)
 
 
         # 排版
@@ -455,9 +455,9 @@ class MainInterfacePlayer2(tk.Frame):
         self.createWidgets()
         
         
-    def instruction(self):  # 這裡放出拳的說明
-        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
+    def camera(self):  # 拍照的函數
         cv.imwrite('game pic.png', frame)
+        tkinter.messagebox.showinfo(title='說明', message='儲存遊戲畫面至電腦中')
 
 
     def scissor_pressed(self):
