@@ -22,14 +22,14 @@ def start():
     conn2.send('2'.encode())
 
 
-def check_connection():
-    while True:
-        try:
-            conn1.send("bytes").encode()
-            conn2.send("bytes").encode()
-        except:
-            start()
-            check_connection()
+# def check_connection():
+#     while True:
+#         try:
+#             conn1.send("bytes").encode()
+#             conn2.send("bytes").encode()
+#         except:
+#             start()
+#             connectionChecker.start()
 
 '''
 Connection initiated
@@ -42,8 +42,8 @@ FORMAT = 'utf-8'
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 server.bind(ADDR)
 start()
-connectionChecker=threading.Thread(target = check_connection)
-connectionChecker.start()
+# connectionChecker=threading.Thread(target = check_connection)
+# connectionChecker.start()
 
 # Game mode selection. 0 for bo3, 1 for bo5, 2 for bo7.
 while True:
